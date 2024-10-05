@@ -1,6 +1,5 @@
 <div
     class="alert alert-primary"
-    role="alert"
->
-    <strong>Alert Heading</strong> Some Word
+    role="alert">
+    <i class="fa-brands fa-android"></i>
 </div>
