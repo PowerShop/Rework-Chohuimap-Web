@@ -1,6 +1,6 @@
 <?php
 
-require dirname(__FILE__) . '/_func.php';
+require dirname(__FILE__) . '/_funcs.php';
 require dirname(__FILE__) . '/_config.php';
 // require dirname(__FILE__) . '/_user.php';
 // require dirname(__FILE__) . '/_shop.php';

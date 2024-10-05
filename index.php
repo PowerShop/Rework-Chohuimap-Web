@@ -1,30 +1,63 @@
-<?php
+<!doctype html>
+<html lang="en">
 
-// Set timezone
-date_default_timezone_set("Asia/Bangkok");
+<head>
+    <title><?php echo isset($_GET['page']) ? strtoupper(htmlspecialchars($_GET['page'])) : 'HOME'; ?></title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-// Hide errors
-@ini_set('display_errors', '0');
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous" />
+</head>
 
-// Include API (Main core)
-require dirname(__FILE__) . '/_funcs/_api.php';
+<body>
+    <?php
 
-// Include Navbar
-include '_pages/navbar.php';
+    // Set timezone
+    date_default_timezone_set("Asia/Bangkok");
 
-$user = $_SESSION['user'];
+    // Hide errors
+    @ini_set('display_errors', '0');
 
-if ($_GET) {
-} else {
-    rdr('?page=home', 500);
-}
+    // Include API (Main core)
+    require dirname(__FILE__) . '/_funcs/_api.php';
 
-if (isset($_GET['page'])) {
-    $page = '_pages/' . $_GET['page'] . '.php';
-    if (file_exists($page)) {
-        include $page;
+    // Include Navbar
+    include '_pages/navbar.php';
+
+    $user = $_SESSION['user'];
+
+    if ($_GET) {
     } else {
-        rdr('?page=404', 500);
+        rdr('?page=home', 500);
     }
-}
-include '_pages/footer.php';
+
+    if (isset($_GET['page'])) {
+        $page = '_pages/' . $_GET['page'] . '.php';
+        if (file_exists($page)) {
+            include $page;
+        } else {
+            rdr('?page=404', 500);
+        }
+    }
+    include '_pages/footer.php';
+    ?>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
