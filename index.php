@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title><?php echo isset($_GET['page']) ? strtoupper(htmlspecialchars($_GET['page'])) : 'HOME'; ?></title>
+    <title>โชห่วยแมพ | หน้า <?php echo isset($_GET['page']) ? strtoupper(htmlspecialchars($_GET['page'])) : 'โชห่วยแมพ | หน้าหลัก'; ?></title>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta
@@ -21,6 +21,12 @@
 
     <!-- Font Awesome -->
     <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/js/all.min.js"></script>
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="_dist/_favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="_dist/_favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="_dist/_favicon/favicon-16x16.png">
+    <link rel="manifest" href="_dist/_favicon/site.webmanifest">
 </head>
 
 <body>
