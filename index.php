@@ -22,6 +22,9 @@
     <!-- Font Awesome -->
     <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/js/all.min.js"></script>
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="_dist/_favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="_dist/_favicon/favicon-32x32.png">
@@ -30,6 +33,9 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="_dist/_css/_main.css" />
+
+    <!-- Require User Location -->
+    <script src="_dist/_js/_requirePermissionLocation.js"></script>
 </head>
 
 <body>

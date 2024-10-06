@@ -11,6 +11,7 @@
             <ul class="navbar-nav me-auto">
                 <!-- <li class="nav-item"><a class="nav-link active" href="quick-find.php">ค้นหาด่วน</a></li> -->
                 <li class="nav-item"><a class="nav-link active" href="index.php"><i class="fa-solid fa-home"></i> หน้าหลัก</a></li>
+                <li class="nav-item"><a class="nav-link active" href="#"><i class="fa-solid fa-info-circle"></i> เกี่ยวกับเว็บไซต์</a></li>
             </ul>
 
         </div>
