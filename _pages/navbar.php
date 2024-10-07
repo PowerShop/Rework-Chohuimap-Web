@@ -15,8 +15,5 @@
             </ul>
 
         </div>
-        <!-- <div class="d-none d-md-block"><button class="btn btn-light me-2" type="button">Button</button>
-            <a class="btn btn-primary" role="button" href="#">Button</a>
-        </div> -->
     </div>
 </nav>

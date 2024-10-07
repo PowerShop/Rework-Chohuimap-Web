@@ -8,95 +8,15 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
     <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
-    <style>
-        #map {
-            width: 100%;
-            height: 80vh;
-        }
 
-        .ol-control button {
-            background-color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .center-user-location {
-            top: 80px;
-            /* Position below the zoom controls */
-            left: .5em;
-        }
-
-        .info-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .info-item img {
-            width: 20px;
-            height: 20px;
-        }
-
-        .card {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .card-text img {
-            width: 25px;
-            height: 25px;
-        }
-
-        .card-text b {
-            font-size: 1.1rem;
-        }
-
-        .step-indicator img {
-            width: 15px;
-            height: 15px;
-        }
-
-        .user-location-marker {
-            color: redc !important;
-            /* Customize the color as needed */
-            font-size: 24px !important;
-            /* Customize the size as needed */
-        }
-    </style>
+    <!-- Custom CSS For MAP Page -->
+    <link rel="stylesheet" href="../_dist/_css/_map.css">
 </head>
 
 <body>
     <div id="map"></div>
     <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
     <script>
-        // Add loading with SweetAlert2 until the map is loaded and the user's position is obtained and the route is drawn and then close the loading
-        Swal.fire({
-            title: 'กำลังโหลดแผนที่',
-            html: 'กรุณารอสักครู่...',
-            timerProgressBar: true,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-
         // When the map is loaded, close the loading
         var map = new ol.Map({
             target: 'map',
@@ -171,7 +91,21 @@
         // Function to draw the route
         function drawRoute(startPoint, destination) {
 
-            // Get the route details
+            // SweetAlert loading
+            Swal.fire({
+                title: 'กำลังค้นหาเส้นทาง',
+                html: 'โปรดรอสักครู่...',
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+
+
+            // Get the route details    
             getRouteDetails(startPoint, destination);
 
             // Get the route steps
@@ -181,8 +115,10 @@
             // Use OSRM API to get the route
 
             fetch(routeUrl)
+                // SweetAlert loading
                 .then(response => response.json())
                 .then(data => {
+                    Swal.close();
 
                     var routeCoords = data.routes[0].geometry.coordinates.map(coord => ol.proj.fromLonLat(coord));
                     var routeFeature = new ol.Feature({
@@ -563,11 +499,6 @@
 
         // Add the custom control to the map
         map.addControl(new CenterUserLocationControl());
-
-        // Remove the loading when the map is loaded
-        map.on('postrender', function() {
-            Swal.close();
-        });
     </script>
 </body>
 
