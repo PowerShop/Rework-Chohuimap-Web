@@ -68,3 +68,22 @@
     font-size: 24px !important;
     /* Customize the size as needed */
 }
+
+.car-animation {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    background: url('../_img/mini-car.png') no-repeat center center;
+    background-size: contain;
+    /* animation: drive 5s linear infinite; */
+}
+
+@keyframes drive {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(100px);
+    }
+}

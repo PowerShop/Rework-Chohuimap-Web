@@ -94,13 +94,14 @@
             // SweetAlert loading
             Swal.fire({
                 title: 'กำลังค้นหาเส้นทาง',
-                html: 'โปรดรอสักครู่...',
+                html: '<img src="../_dist/_img/pathway.gif" width="96px" height="96px">',
                 timerProgressBar: true,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 allowEnterKey: false,
+                showConfirmButton: false,
                 didOpen: () => {
-                    Swal.showLoading()
+                    // Swal.showLoading()
                 }
             });
 
@@ -168,7 +169,7 @@
                         })
                     });
 
-                    startIcon.setStyle(iconStyleStart);
+                    // startIcon.setStyle(iconStyleStart);
                     destinationIcon.setStyle(iconStyleStop);
 
                     var vectorSource = new ol.source.Vector({
@@ -200,7 +201,7 @@
                 </div>
                 <p class="card-text">
                     <?php
-                    $storeName = isset($_GET['storename']) ? $_GET['storename'] : 'Unknown Store';
+                    $storeName = isset($_GET['storename']) ? $_GET['storename'] : 'ร้านค้าที่ไม่ระบุชื่อ';
                     ?>
                     <img src="_dist/_img/circle_orange.png" alt="" srcset=""> <b><span id="destination" style="vertical-align: middle; font-size: 18px;" class="ms-2"><?php echo htmlspecialchars($storeName, ENT_QUOTES, 'UTF-8'); ?></span></b>
                 </p>
@@ -250,132 +251,116 @@
                 .catch(error => console.error('Error fetching route:', error));
         }
 
+
         // Function to get the route steps
         function getRouteSteps(startPoint, destination) {
             // Use OSRM API to get the route
-            var routeUrl = `https://router.project-osrm.org/route/v1/driving/${startPoint[0]},${startPoint[1]};${destination[0]},${destination[1]}?steps=true&overview=full&geometries=geojson`;
-            console.log("routeUrl", routeUrl);
+            const routeUrl = `https://router.project-osrm.org/route/v1/driving/${startPoint[0]},${startPoint[1]};${destination[0]},${destination[1]}?steps=true&overview=full&geometries=geojson`;
+            // console.log("routeUrl", routeUrl);
             fetch(routeUrl)
                 .then(response => response.json())
                 .then(data => {
-                    var steps = data.routes[0].legs[0].steps;
-                    var stepsContainer = document.getElementById('steps');
+                    const steps = data.routes[0].legs[0].steps;
+                    const stepsContainer = document.getElementById('steps');
                     stepsContainer.innerHTML = ''; // Clear previous steps
 
-                    for (var i = 0; i < steps.length; i++) {
-                        var step = steps[i];
-
-                        // Display step instructions
-                        var ref = step.ref;
-                        var turns = step.maneuver.modifier;
-                        var icon = '';
-
-                        // Convert turns to Thai and set icons
-                        switch (turns) {
-                            case 'straight':
-                                turns = 'ตรง';
-                                icon = 'fas fa-arrow-up';
-                                break;
-                            case 'left':
-                                turns = 'เลี้ยวซ้าย';
-                                icon = 'fas fa-arrow-left';
-                                break;
-                            case 'right':
-                                turns = 'เลี้ยวขวา';
-                                icon = 'fas fa-arrow-right';
-                                break;
-                            case 'uturn':
-                                turns = 'เลี้ยว U-turn';
-                                icon = 'fas fa-undo';
-                                break;
-                            case 'sharp left':
-                                turns = 'เลี้ยวซ้ายทันที';
-                                icon = 'fas fa-arrow-left';
-                                break;
-                            case 'sharp right':
-                                turns = 'เลี้ยวขวาทันที';
-                                icon = 'fas fa-arrow-right';
-                                break;
-                            case 'slight left':
-                                turns = 'เลี้ยวซ้ายเล็กน้อย';
-                                icon = 'fas fa-arrow-left';
-                                break;
-                            case 'slight right':
-                                turns = 'เลี้ยวขวาเล็กน้อย';
-                                icon = 'fas fa-arrow-right';
-                                break;
-                            case 'fork left':
-                                turns = 'เลี้ยวซ้ายที่แยกทาง';
-                                icon = 'fas fa-arrow-left';
-                                break;
-                            case 'fork right':
-                                turns = 'เลี้ยวขวาที่แยกทาง';
-                                icon = 'fas fa-arrow-right';
-                                break;
-                            case 'roundabout left':
-                                turns = 'เลี้ยวซ้ายที่วงเวียน';
-                                icon = 'fas fa-arrow-left';
-                                break;
-                            case 'roundabout right':
-                                turns = 'เลี้ยวขวาที่วงเวียน';
-                                icon = 'fas fa-arrow-right';
-                                break;
-                            case 'exit left':
-                                turns = 'เลี้ยวซ้ายที่ทางออก';
-                                icon = 'fas fa-arrow-left';
-                                break;
-                            case 'exit right':
-                                turns = 'เลี้ยวขวาที่ทางออก';
-                                icon = 'fas fa-arrow-right';
-                                break;
-                            default:
-                                turns = '';
-                                icon = 'fas fa-map-marker-alt';
+                    const turnTranslations = {
+                        'straight': {
+                            text: 'ตรง',
+                            icon: 'fas fa-arrow-up'
+                        },
+                        'left': {
+                            text: 'เลี้ยวซ้าย',
+                            icon: 'fas fa-arrow-left'
+                        },
+                        'right': {
+                            text: 'เลี้ยวขวา',
+                            icon: 'fas fa-arrow-right'
+                        },
+                        'uturn': {
+                            text: 'เลี้ยว U-turn',
+                            icon: 'fas fa-undo'
+                        },
+                        'sharp left': {
+                            text: 'เลี้ยวซ้ายทันที',
+                            icon: 'fas fa-arrow-left'
+                        },
+                        'sharp right': {
+                            text: 'เลี้ยวขวาทันที',
+                            icon: 'fas fa-arrow-right'
+                        },
+                        'slight left': {
+                            text: 'เลี้ยวซ้ายเล็กน้อย',
+                            icon: 'fas fa-arrow-left'
+                        },
+                        'slight right': {
+                            text: 'เลี้ยวขวาเล็กน้อย',
+                            icon: 'fas fa-arrow-right'
+                        },
+                        'fork left': {
+                            text: 'เลี้ยวซ้ายที่แยกทาง',
+                            icon: 'fas fa-arrow-left'
+                        },
+                        'fork right': {
+                            text: 'เลี้ยวขวาที่แยกทาง',
+                            icon: 'fas fa-arrow-right'
+                        },
+                        'roundabout left': {
+                            text: 'เลี้ยวซ้ายที่วงเวียน',
+                            icon: 'fas fa-arrow-left'
+                        },
+                        'roundabout right': {
+                            text: 'เลี้ยวขวาที่วงเวียน',
+                            icon: 'fas fa-arrow-right'
+                        },
+                        'exit left': {
+                            text: 'เลี้ยวซ้ายที่ทางออก',
+                            icon: 'fas fa-arrow-left'
+                        },
+                        'exit right': {
+                            text: 'เลี้ยวขวาที่ทางออก',
+                            icon: 'fas fa-arrow-right'
+                        },
+                        'default': {
+                            text: '',
+                            icon: 'fas fa-map-marker-alt'
                         }
+                    };
 
-                        // Check if ref is undefined
-                        if (ref === undefined) {
-                            ref = turns + 'ที่ถนน ' + 'ไม่ทราบชื่อ';
-                        } else {
-                            ref = turns + 'ที่ถนน ' + ref;
-                        }
+                    steps.forEach((step, index) => {
+                        let {
+                            text: turns,
+                            icon
+                        } = turnTranslations[step.maneuver.modifier] || turnTranslations['default'];
+                        let ref = step.ref ? `${turns}ที่ถนน ${step.ref}` : `${turns}ที่ถนน ไม่ทราบชื่อ`;
 
-                        // Add start point
-                        if (i === 0) {
+                        if (index === 0) {
                             ref = 'จุดเริ่มต้น';
                             turns = '';
                             icon = 'fas fa-flag-checkered';
-                        }
-
-                        // Last step is destination
-                        if (i === steps.length - 1) {
+                        } else if (index === steps.length - 1) {
                             ref = 'จุดหมายปลายทาง';
                             turns = '';
                             icon = 'fas fa-flag-checkered';
                         }
 
-                        // console.log(ref);
-                        var stepText = new ol.Overlay({
+                        const stepText = new ol.Overlay({
                             position: ol.proj.fromLonLat([step.maneuver.location[0], step.maneuver.location[1]]),
                             element: document.createElement('div')
                         });
 
-                        // Use ref as the step text
+
                         stepText.getElement().innerHTML = `<img src="_dist/_img/pin.png" alt=""> <span>${ref}</span>`;
                         stepsContainer.appendChild(stepText.getElement());
 
-                        // Add icon to the step text
-                        var iconElement = document.createElement('i');
+                        const iconElement = document.createElement('i');
                         iconElement.className = icon;
                         iconElement.style.color = '#007bff';
                         iconElement.style.marginLeft = '5px'; // Add space between icon and text
                         iconElement.style.transform = 'scale(1.2)'; // Scale icon up
-                        // stepText.getElement().appendChild(iconElement);
 
-                        // Add a line break
                         stepText.getElement().appendChild(document.createElement('br'));
-
-                    }
+                    });
                 })
                 .catch(error => console.error('Error fetching route:', error));
         }
@@ -397,7 +382,7 @@
                 stopEvent: false
             });
             marker.getElement().className = 'user-location-marker';
-            marker.getElement().innerHTML = '<i class="fas fa-map-marker-alt" aria-hidden="true"></i>';
+            marker.getElement().innerHTML = '<div class="car-animation" aria-hidden="true"></div>';
             map.addOverlay(marker);
 
             if (navigator.geolocation) {
@@ -409,6 +394,91 @@
                         marker.setPosition(ol.proj.fromLonLat(snappedLocation));
 
                         map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
+
+                        // Update route line and 
+                        var routeUrl = `https://router.project-osrm.org/route/v1/driving/${snappedLocation[0]},${snappedLocation[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
+                        fetch(routeUrl)
+                            .then(response => response.json())
+                            .then(data => {
+                                var routeCoords = data.routes[0].geometry.coordinates.map(coord => ol.proj.fromLonLat(coord));
+                                var routeFeature = new ol.Feature({
+                                    geometry: new ol.geom.LineString(routeCoords)
+                                });
+
+                                var vectorSource = new ol.source.Vector({
+                                    features: [routeFeature]
+                                });
+
+                                var vectorLayer = new ol.layer.Vector({
+                                    source: vectorSource,
+                                    style: new ol.style.Style({
+                                        stroke: new ol.style.Stroke({
+                                            color: '#00aaff',
+                                            width: 4
+                                        })
+                                    })
+                                });
+
+                                map.getLayers().forEach(layer => {
+                                    if (layer instanceof ol.layer.Vector) {
+                                        map.removeLayer(layer);
+                                    }
+                                });
+
+                                map.addLayer(vectorLayer);
+                            })
+                            .catch(error => console.error('Error fetching route:', error));
+
+                        // Update the route details
+                        getRouteDetails(snappedLocation, destination);
+
+                        // Highlight the current step (รอทดสอบ)
+                        var routeUrl = `https://router.project-osrm.org/route/v1/driving/${snappedLocation[0]},${snappedLocation[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson&steps=true`;
+                        fetch(routeUrl)
+                            .then(response => response.json())
+                            .then(data => {
+                                var steps = data.routes[0].legs[0].steps;
+                                var currentStep = steps.find(step => {
+                                    var stepCoords = step.geometry.coordinates;
+                                    return stepCoords.some(coord => coord[0] === snappedLocation[0] && coord[1] === snappedLocation[1]);
+                                });
+
+                                var currentStepIndex = steps.indexOf(currentStep);
+                                var stepTexts = document.querySelectorAll('.step-indicator > div');
+
+                                stepTexts.forEach((stepText, index) => {
+                                    if (index === currentStepIndex) {
+                                        stepText.style.fontWeight = 'bold';
+                                        stepText.style.color = '#007bff';
+                                    } else {
+                                        stepText.style.fontWeight = 'normal';
+                                        stepText.style.color = '#000';
+                                    }
+                                });
+                            })
+                            .catch(error => console.error('Error fetching route:', error));
+
+
+
+                        // Calculate the distance between the user's location and the destination
+                        var distance = turf.distance(turf.point(snappedLocation), turf.point(destination), {
+                            units: 'kilometers'
+
+                        });
+
+                        // If the user is within 0.01 km of the destination, show a success message
+                        if (distance < 0.01) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'คุณเดินทางถึงที่หมายแล้ว',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+
+                        // Debugging
+                        console.log('Distance to destination:', distance);
+
                     },
                     error => {
                         console.error('Error tracking user location:', error);
@@ -459,10 +529,25 @@
                     target: options.target
                 });
 
+                // Click event to center the map on the user's location
                 button.addEventListener('click', this.handleCenterUserLocation.bind(this), false);
+
             }
 
             handleCenterUserLocation() {
+                // SweetAlert loading
+                Swal.fire({
+                    title: 'กำลังค้นหาตำแหน่งปัจจุบัน',
+                    html: '<img src="../_dist/_img/pathway.gif" width="96px" height="96px">',
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        // Swal.showLoading()
+                    }
+                });
                 getUserPosition()
                     .then(userPosition => {
                         var userLocation = [userPosition[0], userPosition[1]];
@@ -475,21 +560,17 @@
                                 var routeCoords = data.routes[0].geometry.coordinates;
                                 var snappedLocation = snapToRoute(userLocation, routeCoords);
 
-                                map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
-                                map.getView().setZoom(18);
+                                // Close the loading alert once the animation is done
+                                Swal.close();
 
-                                // Create a marker element
-                                const marker = new ol.Overlay({
-                                    position: ol.proj.fromLonLat(snappedLocation),
-                                    positioning: 'center-center',
-                                    element: document.createElement('div'),
-                                    stopEvent: false
-                                });
-                                marker.getElement().className = 'user-location-marker';
-                                marker.getElement().innerHTML = '<i class="fas fa-map-marker-alt" aria-hidden="true"></i>';
+                                // Smoothly animate the map to the new center
+                                map.getView().animate({
+                                    center: ol.proj.fromLonLat(snappedLocation),
+                                    zoom: 18,
+                                    duration: 3000 // duration in milliseconds
+                                }, () => {});
 
-                                // Add the marker to the map
-                                map.addOverlay(marker);
+
                             })
                             .catch(error => console.error('Error fetching route:', error));
                     })
