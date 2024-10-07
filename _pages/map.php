@@ -7,10 +7,11 @@
     <title>OpenStreetMap with OpenLayers</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
     <style>
         #map {
             width: 100%;
-            height: 90vh;
+            height: 80vh;
         }
 
         .ol-control button {
@@ -70,6 +71,13 @@
         .step-indicator img {
             width: 15px;
             height: 15px;
+        }
+
+        .user-location-marker {
+            color: redc !important;
+            /* Customize the color as needed */
+            font-size: 24px !important;
+            /* Customize the size as needed */
         }
     </style>
 </head>
@@ -239,11 +247,6 @@
                 })
                 .catch(error => console.error('Error fetching route:', error));
         }
-
-        // Remove the loading when the map is loaded
-        map.on('postrender', function() {
-            Swal.close();
-        });
     </script>
 
     <div class="container mt-3" id="route_detial">
@@ -252,15 +255,18 @@
                 <!-- <h4 class="card-title">Title</h4> -->
                 <!-- <button class="btn btn-primary" onclick="searchRoute()">ค้นหาตำแหน่งปัจจุบัน</button> -->
                 <p class="card-text">
-                    <img src="_dist/_img/circle_blue.png" alt="" srcset=""> <b><span id="start" style="vertical-align: middle;" class="ms-2">จุดเริ่มต้น</span></b>
+                    <img src="_dist/_img/circle_blue.png" alt="" srcset=""> <b><span id="start" style="vertical-align: middle; font-size: 18px;" class="ms-2">ตำแหน่งของคุณ</span></b>
                 </p>
                 <div style="text-align: start; padding-left: 7.5px;">
                     <p><img src="_dist/_img/circle_gray_mini.png" alt=""></p>
                     <p><img src="_dist/_img/circle_gray_mini.png" alt=""></p>
                     <p><img src="_dist/_img/circle_gray_mini.png" alt=""></p>
                 </div>
-                <p>
-                    <img src="_dist/_img/circle_orange.png" alt="" srcset=""> <b><span id="destination" style="vertical-align: middle;" class="ms-2">จุดหมายปลายทาง</span></b>
+                <p class="card-text">
+                    <?php
+                    $storeName = isset($_GET['storename']) ? $_GET['storename'] : 'Unknown Store';
+                    ?>
+                    <img src="_dist/_img/circle_orange.png" alt="" srcset=""> <b><span id="destination" style="vertical-align: middle; font-size: 18px;" class="ms-2"><?php echo htmlspecialchars($storeName, ENT_QUOTES, 'UTF-8'); ?></span></b>
                 </p>
                 <p class="text-center">
                 <div class="info-container">
@@ -412,7 +418,7 @@
                             icon = 'fas fa-flag-checkered';
                         }
 
-                        console.log(ref);
+                        // console.log(ref);
                         var stepText = new ol.Overlay({
                             position: ol.proj.fromLonLat([step.maneuver.location[0], step.maneuver.location[1]]),
                             element: document.createElement('div')
@@ -439,53 +445,34 @@
         }
 
 
-        // Function to snap the user's location to the nearest point on the route
+        // Function to snap the user's location to the nearest point on the route using Turf.js
         function snapToRoute(userLocation, routeCoords) {
-            var nearestPoint = routeCoords[0];
-            var minDistance = ol.sphere.getDistance(userLocation, nearestPoint);
-
-            for (var i = 1; i < routeCoords.length; i++) {
-                var distance = ol.sphere.getDistance(userLocation, routeCoords[i]);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearestPoint = routeCoords[i];
-                }
-            }
-
-            return nearestPoint;
+            const userPoint = turf.point(userLocation);
+            const line = turf.lineString(routeCoords);
+            const snapped = turf.nearestPointOnLine(line, userPoint);
+            return snapped.geometry.coordinates;
         }
 
         // Function to track the user's location in real-time
         function trackUserLocation(routeCoords) {
-            var userLayer = new ol.layer.Vector({
-                source: new ol.source.Vector()
+            const marker = new ol.Overlay({
+                positioning: 'center-center',
+                element: document.createElement('div'),
+                stopEvent: false
             });
-            map.addLayer(userLayer);
+            marker.getElement().className = 'user-location-marker';
+            marker.getElement().innerHTML = '<i class="fas fa-map-marker-alt" aria-hidden="true"></i>';
+            map.addOverlay(marker);
 
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     position => {
-                        var userLocation = ol.proj.fromLonLat([position.coords.longitude, position.coords.latitude]);
+                        var userLocation = [position.coords.longitude, position.coords.latitude];
                         var snappedLocation = snapToRoute(userLocation, routeCoords);
 
-                        var userFeature = new ol.Feature({
-                            geometry: new ol.geom.Point(snappedLocation)
-                        });
+                        marker.setPosition(ol.proj.fromLonLat(snappedLocation));
 
-                        var userStyle = new ol.style.Style({
-                            image: new ol.style.Icon({
-                                anchor: [0.5, 1],
-                                src: '../_dist/_img/user_location.png',
-                                scale: 0.05
-                            })
-                        });
-
-                        userFeature.setStyle(userStyle);
-
-                        userLayer.getSource().clear(); // Clear previous user location
-                        userLayer.getSource().addFeature(userFeature);
-
-                        map.getView().setCenter(snappedLocation);
+                        map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
                     },
                     error => {
                         console.error('Error tracking user location:', error);
@@ -508,11 +495,11 @@
                 getRouteSteps(userPosition, destination);
 
                 // Fetch the route coordinates for snapping
-                var routeUrl = `https://router.project-osrm.org/route/v1/driving/${userPosition[0]},${userPosition[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
+                var routeUrl = `https://router.project-osrm.org/route/v1/driving/${userPosition[0]},${userPosition[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson&steps=true`;
                 fetch(routeUrl)
                     .then(response => response.json())
                     .then(data => {
-                        var routeCoords = data.routes[0].geometry.coordinates.map(coord => ol.proj.fromLonLat(coord));
+                        var routeCoords = data.routes[0].geometry.coordinates;
                         trackUserLocation(routeCoords); // Start tracking the user's location
                     })
                     .catch(error => console.error('Error fetching route:', error));
@@ -542,9 +529,33 @@
             handleCenterUserLocation() {
                 getUserPosition()
                     .then(userPosition => {
-                        var userLocation = ol.proj.fromLonLat(userPosition);
-                        map.getView().setCenter(userLocation);
-                        map.getView().setZoom(18);
+                        var userLocation = [userPosition[0], userPosition[1]];
+
+                        // Fetch the route coordinates for snapping
+                        var routeUrl = `https://router.project-osrm.org/route/v1/driving/${userPosition[0]},${userPosition[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
+                        fetch(routeUrl)
+                            .then(response => response.json())
+                            .then(data => {
+                                var routeCoords = data.routes[0].geometry.coordinates;
+                                var snappedLocation = snapToRoute(userLocation, routeCoords);
+
+                                map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
+                                map.getView().setZoom(18);
+
+                                // Create a marker element
+                                const marker = new ol.Overlay({
+                                    position: ol.proj.fromLonLat(snappedLocation),
+                                    positioning: 'center-center',
+                                    element: document.createElement('div'),
+                                    stopEvent: false
+                                });
+                                marker.getElement().className = 'user-location-marker';
+                                marker.getElement().innerHTML = '<i class="fas fa-map-marker-alt" aria-hidden="true"></i>';
+
+                                // Add the marker to the map
+                                map.addOverlay(marker);
+                            })
+                            .catch(error => console.error('Error fetching route:', error));
                     })
                     .catch(error => console.error('Error getting user position:', error));
             }
@@ -552,6 +563,11 @@
 
         // Add the custom control to the map
         map.addControl(new CenterUserLocationControl());
+
+        // Remove the loading when the map is loaded
+        map.on('postrender', function() {
+            Swal.close();
+        });
     </script>
 </body>
 

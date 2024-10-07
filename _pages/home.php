@@ -169,9 +169,9 @@
                                 <div class="text-center">
                                     <div class="row>
                                         <div class="col-md-12">
-                                            <a href="?page=map&lat=${store.store_lat}&lon=${store.store_lon}" class="btn btn-primary mb-1 text-white col-md-4"><i class="fa-solid fa-route me-2"></i>เดินทาง</a>
+                                            <a href="?page=map&storename=${store.store_name}&lat=${store.store_lat}&lon=${store.store_lon}" class="btn btn-primary mb-1 text-white col-md-4"><i class="fa-solid fa-route me-2"></i>เดินทาง</a>
                                             <a href="tel:${store.store_phone}" class="btn btn-success mb-1 text-white col-md-4"><i class="fa-solid fa-phone me-2"></i>โทร</a>
-                                            <a href="#" class="btn btn-info mb-1 text-white col-md-4"><i class="fa-solid fa-info-circle me-2"></i>รายละเอียด</a>
+                                            <button class="btn btn-info mb-1 text-white col-md-4 infooo" data-store-name="${store.store_name}" data-store-info="นี่คือรายละเอียดเกี่ยวกับ ${store.store_name}"><i class="fa-solid fa-info-circle me-2"></i>รายละเอียด</button>
                                         </div>
                                     </div>
                                 </div>
@@ -183,4 +183,25 @@
         });
     }
 </script>
+
+<!-- SweetAlert2 -->
+<!-- เมื่อกดที่ปุ่ม Info ของร้านค้า จะเปิดหน้า sweet alert ที่มีข้อมูลเพิ่มเติมของร้านค้า -->
+<script>
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('infooo')) {
+            const button = event.target;
+            const storeName = button.getAttribute('data-store-name');
+            const storeInfo = button.getAttribute('data-store-info');
+
+            Swal.fire({
+                title: storeName,
+                text: storeInfo,
+                icon: 'info',
+                confirmButtonText: 'Close'
+            });
+        }
+    });
+</script>
+
+<!-- Make Javascript to random ร้านค้าขึ้นมาแนะนำตรงมุมของหน้าจอ -->
 </div>

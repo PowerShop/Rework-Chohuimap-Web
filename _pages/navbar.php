@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-md bg-body py-3">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
+        <a class="navbar-brand d-flex align-items-center" href="?page=home">
 
             <span><img src="_dist/_favicon/favicon-32x32.png" alt="โชห่วยแมพ"> โชห่วยแมพ</span>
         </a>
@@ -10,7 +10,7 @@
         <div class="collapse navbar-collapse flex-grow-0 order-md-first" id="navcol-4">
             <ul class="navbar-nav me-auto">
                 <!-- <li class="nav-item"><a class="nav-link active" href="quick-find.php">ค้นหาด่วน</a></li> -->
-                <li class="nav-item"><a class="nav-link active" href="index.php"><i class="fa-solid fa-home"></i> หน้าหลัก</a></li>
+                <li class="nav-item"><a class="nav-link active" href="?page=home"><i class="fa-solid fa-home"></i> หน้าหลัก</a></li>
                 <li class="nav-item"><a class="nav-link active" href="#"><i class="fa-solid fa-info-circle"></i> เกี่ยวกับเว็บไซต์</a></li>
             </ul>
 
