@@ -4,8 +4,8 @@ if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(
         function (position) {
             // Success callback
-            console.log("Latitude: " + position.coords.latitude);
-            console.log("Longitude: " + position.coords.longitude);
+            // console.log("Latitude: " + position.coords.latitude);
+            // console.log("Longitude: " + position.coords.longitude);
         },
         function (error) {
             // Error callback

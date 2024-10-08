@@ -32,6 +32,7 @@
         });
 
 
+
         // Coordinates for the destination (ร้านเจ๊จันทร์ บ้านห้วยผาก)
         // Get latitude and longitude from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -73,7 +74,7 @@
                             var lon = position.coords.longitude;
                             var coordinate = lon + ',' + lat;
                             start_coordinate = coordinate;
-                            console.log('ตำแหน่งปัจจุบัน: ', coordinate);
+                            // console.log('ตำแหน่งปัจจุบัน: ', coordinate);
                             resolve([position.coords.longitude, position.coords.latitude]);
                         },
                         error => {
@@ -86,8 +87,6 @@
             });
         }
 
-
-
         // Function to draw the route
         function drawRoute(startPoint, destination) {
 
@@ -98,7 +97,6 @@
                 timerProgressBar: true,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                allowEnterKey: false,
                 showConfirmButton: false,
                 didOpen: () => {
                     // Swal.showLoading()
@@ -349,9 +347,10 @@
                             element: document.createElement('div')
                         });
 
-
-                        stepText.getElement().innerHTML = `<img src="_dist/_img/pin.png" alt=""> <span>${ref}</span>`;
-                        stepsContainer.appendChild(stepText.getElement());
+                        const stepElement = document.createElement('div');
+                        stepElement.className = 'step-text';
+                        stepElement.innerHTML = `<i class="${icon}"></i> ${ref}`;
+                        stepsContainer.appendChild(stepElement);
 
                         const iconElement = document.createElement('i');
                         iconElement.className = icon;
@@ -425,18 +424,6 @@
                                     }
                                 });
 
-                                map.addLayer(vectorLayer);
-                            })
-                            .catch(error => console.error('Error fetching route:', error));
-
-                        // Update the route details
-                        getRouteDetails(snappedLocation, destination);
-
-                        // Highlight the current step (รอทดสอบ)
-                        var routeUrl = `https://router.project-osrm.org/route/v1/driving/${snappedLocation[0]},${snappedLocation[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson&steps=true`;
-                        fetch(routeUrl)
-                            .then(response => response.json())
-                            .then(data => {
                                 var steps = data.routes[0].legs[0].steps;
                                 var currentStep = steps.find(step => {
                                     var stepCoords = step.geometry.coordinates;
@@ -455,9 +442,17 @@
                                         stepText.style.color = '#000';
                                     }
                                 });
+
+                                map.addLayer(vectorLayer);
                             })
                             .catch(error => console.error('Error fetching route:', error));
 
+                        // Update the route details
+                        getRouteDetails(snappedLocation, destination);
+                        // หมุนแผนที่ตามทิศทางการเดินทาง
+                        // var heading = position.coords.heading;
+                        // marker.getElement().style.transform = `rotate(${heading}deg)`;
+                        // map.getView().setRotation(-heading * Math.PI / 180);
 
 
                         // Calculate the distance between the user's location and the destination
@@ -510,7 +505,20 @@
                     })
                     .catch(error => console.error('Error fetching route:', error));
             })
-            .catch(error => console.error('Error getting user position:', error));
+            .catch(
+                error => console.error('Error getting user position:', error),
+                // แสดงข้อความเมื่อไม่สามารถระบุตำแหน่งปัจจุบันได้
+                Swal.fire({
+                    // icon: 'error',
+                    html: '<img src="../_dist/_img/maps.gif" width="96px" height="96px"><br>กรุณาเปิด GPS หรืออนุญาตให้เว็บไซต์เข้าถึงตำแหน่งปัจจุบันของคุณ',
+                    title: '',
+                    text: 'กรุณาเปิด GPS หรืออนุญาตให้เว็บไซต์เข้าถึงตำแหน่งปัจจุบันของคุณ',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                })
+
+            );
 
         // Custom control for centering on user location
         class CenterUserLocationControl extends ol.control.Control {
@@ -542,7 +550,6 @@
                     timerProgressBar: true,
                     allowOutsideClick: false,
                     allowEscapeKey: false,
-                    allowEnterKey: false,
                     showConfirmButton: false,
                     didOpen: () => {
                         // Swal.showLoading()
