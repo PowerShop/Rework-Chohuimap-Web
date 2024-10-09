@@ -461,6 +461,11 @@
                                     var distance = data.routes[0].distance / 1000; // ระยะทางในหน่วยกิโลเมตร
                                     console.log('Distance to destination (OSRM):', distance);
 
+                                    // อัพเดทระยะทางและเวลาที่เหลือ
+                                    document.getElementById('distance').innerText = `${distance.toFixed(2)} กิโลเมตร`;
+                                    document.getElementById('duration').innerText = `${(data.routes[0].duration / 60).toFixed(0)} นาที`;
+                                    
+
                                     // ตรวจสอบว่าผู้ใช้ถึงจุดหมายหรือไม่ และยังไม่ได้แจ้งเตือน
                                     if (distance < 0.05 && !hasReachedDestination) {
                                         Swal.fire({
