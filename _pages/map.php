@@ -9,12 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
     <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
 
-    <!-- Map box -->
-
-    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
-
-
+    <!-- Custom JS -->
+    <script src="../_dist/_js/_goToTop.js"></script>
 
     <!-- Custom CSS For MAP Page -->
     <link rel="stylesheet" href="../_dist/_css/_map.css">
@@ -23,6 +19,73 @@
 
 <body>
     <div id="map"></div>
+    <div class="container mt-3" id="route_detial">
+        <div class="card border border-0">
+            <div class="card-body">
+                <!-- <h4 class="card-title">Title</h4> -->
+                <!-- <button class="btn btn-primary" onclick="searchRoute()">ค้นหาตำแหน่งปัจจุบัน</button> -->
+                <p class="card-text">
+                    <img src="_dist/_img/circle_blue.png" alt="" srcset="">
+                    <b><span id="start" style="vertical-align: middle; font-size: 18px;" class="ms-2">ตำแหน่งของคุณ</span></b>
+                </p>
+                <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 3px;">
+                    <p style="display: flex; align-items: center;">
+                        <img src="_dist/_img/pin.png" alt="" width="16px" height="16px">
+                        <span class="info-item">
+                            &nbsp;<span id="distance"></span>
+                        </span>
+                    </p>
+                    <p style="display: flex; align-items: center;">
+                        <img src="_dist/_img/clock.png" alt="" width="16px" height="16px">
+                        <span class="info-item">
+                            &nbsp;<span id="duration"></span>
+                        </span>
+                    </p>
+                </div>
+                <p class="card-text">
+                    <?php
+                    $storeName = isset($_GET['storename']) ? $_GET['storename'] : 'ร้านค้าที่ไม่ระบุชื่อ';
+                    ?>
+                    <img src="_dist/_img/circle_orange.png" alt="" srcset="">
+                    <b><span id="destination" style="vertical-align: middle; font-size: 18px;" class="ms-2"><?php echo htmlspecialchars($storeName, ENT_QUOTES, 'UTF-8'); ?></span></b>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container mt-3" id="route_steps">
+        <div class="card border border-0">
+            <div class="card-body">
+                <h4 class="card-title">ขั้นตอนการเดินทาง</h4>
+                <div id="steps" class="step-indicator">
+                    <!-- <img src="_dist/_img/step.png" alt=""> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="topFunction()" id="go-to-top" title="Go to top"><i class="fa-solid fa-arrow-up"></i></button>
+    <script>
+        // Go to top function
+        let mybutton = document.getElementById("go-to-top");
+
+        // Check if the mybutton element exists before accessing its style property
+        if (mybutton) {
+            // When the user scrolls down 20px from the top of the document, show the button
+            window.addEventListener("scroll", scrollFunction);
+
+            function scrollFunction() {
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    mybutton.style.display = "block";
+                } else {
+                    mybutton.style.display = "none";
+                }
+            }
+        }
+    </script>
+
+    <!-- Main Script -->
     <script>
         // Load the OpenLayers map
         var layername = 'icons';
@@ -147,7 +210,15 @@
                     map.addLayer(routeLayer);
                     map.addLayer(iconLayer);
                 })
-                .catch(error => console.error('Error fetching route:', error));
+                .catch(error => {
+                    console.error('Error fetching route:', error);
+
+                    // If error = Failed to fetch or ERR_CONNECTION_TIMED_OUT try to fetch again
+                    if (error.message === 'Failed to fetch' || error.message === 'ERR_CONNECTION_TIMED_OUT') {
+                        console.log('Retrying to fetch route...');
+                        drawRoute(startPoint, destination);
+                    }
+                });
 
 
             // Get the route details    
@@ -156,56 +227,6 @@
             // Get the route steps
             getRouteSteps(startPoint, destination);
         }
-    </script>
-
-    <div class="container mt-3" id="route_detial">
-        <div class="card border border-0">
-            <div class="card-body">
-                <!-- <h4 class="card-title">Title</h4> -->
-                <!-- <button class="btn btn-primary" onclick="searchRoute()">ค้นหาตำแหน่งปัจจุบัน</button> -->
-                <p class="card-text">
-                    <img src="_dist/_img/circle_blue.png" alt="" srcset=""> <b><span id="start" style="vertical-align: middle; font-size: 18px;" class="ms-2">ตำแหน่งของคุณ</span></b>
-                </p>
-                <div style="text-align: start; padding-left: 7.5px;">
-                    <p><img src="_dist/_img/circle_gray_mini.png" alt=""></p>
-                    <p><img src="_dist/_img/circle_gray_mini.png" alt=""></p>
-                    <p><img src="_dist/_img/circle_gray_mini.png" alt=""></p>
-                </div>
-                <p class="card-text">
-                    <?php
-                    $storeName = isset($_GET['storename']) ? $_GET['storename'] : 'ร้านค้าที่ไม่ระบุชื่อ';
-                    ?>
-                    <img src="_dist/_img/circle_orange.png" alt="" srcset=""> <b><span id="destination" style="vertical-align: middle; font-size: 18px;" class="ms-2"><?php echo htmlspecialchars($storeName, ENT_QUOTES, 'UTF-8'); ?></span></b>
-                </p>
-                <p class="text-center">
-                <div class="info-container">
-                    <span class="info-item">
-                        <img src="_dist/_img/pin.png" alt="">
-                        <span id="distance"></span>
-                    </span>
-
-                    <span class="info-item">
-                        <img src="_dist/_img/clock.png" alt="">
-                        <span id="duration"></span>
-                    </span>
-                </div>
-                </p>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="container mt-3" id="route_steps">
-        <div class="card border border-0">
-            <div class="card-body">
-                <h4 class="card-title">ขั้นตอนการเดินทาง</h4>
-                <div id="steps" class="step-indicator">
-                    <!-- <img src="_dist/_img/step.png" alt=""> -->
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
         // Function to get the route details
         function getRouteDetails(startPoint, destination) {
 
@@ -349,6 +370,8 @@
 
         // เพิ่มตัวแปรสำหรับเก็บสถานะว่าผู้ใช้ถึงจุดหมายแล้วหรือไม่
         let hasReachedDestination = false;
+        var userLocation = [];
+        var routeCoords = [];
 
         // Function to track the user's location in real-time
         function trackUserLocation(routeCoords) {
@@ -364,11 +387,11 @@
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     position => {
-                        var userLocation = [position.coords.longitude, position.coords.latitude];
+                        userLocation = [position.coords.longitude, position.coords.latitude];
                         var snappedLocation = snapToRoute(userLocation, routeCoords);
 
                         // เรียก OSRM API เพื่อคำนวณเส้นทางจริง
-                        var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLocation[0]},${userLocation[1]};${destination[0]},${destination[1]}?overview=false`;
+                        var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLocation[0]},${userLocation[1]};${destination[0]},${destination[1]}?overview=false&geometries=geojson`;
 
                         // Update new route with current location without fetch API
                         var routeFeature = new ol.Feature({
@@ -481,7 +504,7 @@
                 fetch(routeUrl)
                     .then(response => response.json())
                     .then(data => {
-                        var routeCoords = data.routes[0].geometry.coordinates;
+                        routeCoords = data.routes[0].geometry.coordinates;
                         trackUserLocation(routeCoords); // Start tracking the user's location
                     })
                     .catch(error => console.error('Error fetching route:', error));
@@ -526,42 +549,16 @@
             }
 
             handleCenterUserLocation() {
-                // SweetAlert loading
-                Swal.fire({
-                    html: '<img src="../_dist/_img/pathway.gif" width="96px" height="96px"><br>กำลังค้นหาตำแหน่งปัจจุบัน',
-                    timerProgressBar: true,
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        // Swal.showLoading()
-                    }
-                });
-                getUserPosition()
-                    .then(userPosition => {
-                        var userLocation = [userPosition[0], userPosition[1]];
 
-                        // Use Turf.js to snap the user's location to the nearest point on the route
-                        var routeUrl = `https://router.project-osrm.org/route/v1/driving/${userPosition[0]},${userPosition[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
-                        fetch(routeUrl)
-                            .then(response => response.json())
-                            .then(data => {
-                                var routeCoords = data.routes[0].geometry.coordinates;
-                                var snappedLocation = snapToRoute(userLocation, routeCoords);
+                var snappedLocation = snapToRoute(userLocation, routeCoords);
 
-                                // Close the loading alert once the animation is done
-                                Swal.close();
+                // Smoothly animate the map to the new center
+                map.getView().animate({
+                    center: ol.proj.fromLonLat(snappedLocation),
+                    zoom: 18,
+                    duration: 3000 // duration in milliseconds
+                })
 
-                                // Smoothly animate the map to the new center
-                                map.getView().animate({
-                                    center: ol.proj.fromLonLat(snappedLocation),
-                                    zoom: 18,
-                                    duration: 10000 // duration in milliseconds
-                                });
-                            })
-                            .catch(error => console.error('Error fetching route:', error));
-                    })
-                    .catch(error => console.error('Error getting user position:', error));
             }
         }
 
