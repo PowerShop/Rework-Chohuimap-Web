@@ -234,20 +234,12 @@
             fetch(routeUrl)
                 .then(response => response.json())
                 .then(data => {
+                    
                     const steps = data.routes[0].legs[0].steps;
                     const distance = data.routes[0].legs[0].distance / 1000; // Convert meters to kilometers
                     const stepsContainer = document.getElementById('steps');
                     stepsContainer.innerHTML = ''; // Clear previous steps
 
-                    // If the user is within 0.01 km of the destination, show a success message
-                    if (distance < 0.01) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'คุณเดินทางถึงที่หมายแล้ว',
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                    }
 
                     // Debugging
                     console.log('Distance to destination:', distance);
@@ -385,7 +377,7 @@
                         // Update new route with current location without fetch API
                         // New route layer
                         var routeFeature = new ol.Feature({
-                            geometry: new ol.geom.LineString(routeCoords)
+                            geometry: new ol.geom.LineString(snappedLocation)
                         });
 
                         var routeSource = new ol.source.Vector({
@@ -441,71 +433,8 @@
                         map.addLayer(iconLayer);
 
 
-                        // // Update route line
-                        // var routeUrl = `https://router.project-osrm.org/route/v1/driving/${snappedLocation[0]},${snappedLocation[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
-                        // fetch(routeUrl)
-                        //     .then(response => response.json())
-                        //     .then(data => {
-                        //         Swal.close(); // Close the loading alert
-                        //         var routeCoords = data.routes[0].geometry.coordinates.map(coord => ol.proj.fromLonLat(coord));
-                        //         // New route layer
-                        //         var routeFeature = new ol.Feature({
-                        //             geometry: new ol.geom.LineString(routeCoords)
-                        //         });
-
-                        //         var routeSource = new ol.source.Vector({
-                        //             features: [routeFeature]
-                        //         });
-
-                        //         var routeLayer = new ol.layer.Vector({
-                        //             source: routeSource,
-                        //             style: new ol.style.Style({
-                        //                 stroke: new ol.style.Stroke({
-                        //                     color: '#00aaff',
-                        //                     width: 4
-                        //                 })
-                        //             })
-                        //         });
-
-                        //         // Add end point icon
-                        //         var destinationIcon = new ol.Feature({
-                        //             geometry: new ol.geom.Point(ol.proj.fromLonLat([destination[0], destination[1]]))
-                        //         });
-
-                        //         var iconStyleStop = new ol.style.Style({
-                        //             image: new ol.style.Icon({
-                        //                 anchor: [0.5, 1],
-                        //                 src: '../_dist/_img/end.png',
-                        //                 scale: 0.05
-                        //             })
-                        //         });
-
-                        //         destinationIcon.setStyle(iconStyleStop);
-
-                        //         var iconSource = new ol.source.Vector({
-                        //             features: [destinationIcon]
-                        //         });
-
-                        //         var iconLayer = new ol.layer.Vector({
-                        //             source: iconSource
-                        //         });
-
-                        //         // Remove existing route and icon layers
-                        //         map.getLayers().forEach(layer => {
-                        //             if (layer.get('name') === 'route' || layer.get('name') === 'icon') {
-                        //                 map.removeLayer(layer);
-                        //             }
-                        //         });
-
-                        //         // Add new route and icon layers
-                        //         map.addLayer(routeLayer);
-                        //         map.addLayer(iconLayer);
-                        //         // map.addLayer(circleLayer);
-                        //     })
-                        //     .catch(error => console.error('Error fetching route:', error));
-
-                        // // debug update user location
-                        // console.log('ตำแหน่งปัจจุบัน: ', snappedLocation);
+                        // debug update user location
+                        console.log('ตำแหน่งปัจจุบัน: ', snappedLocation);
 
 
                     },
