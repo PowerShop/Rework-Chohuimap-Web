@@ -18,11 +18,11 @@
 
     <!-- Custom CSS For MAP Page -->
     <link rel="stylesheet" href="../_dist/_css/_map.css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
 </head>
 
 <body>
     <div id="map"></div>
-    <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
     <script>
         // Load the OpenLayers map
         var layername = 'icons';
@@ -31,18 +31,16 @@
             target: 'map',
             layers: [
                 new ol.layer.Tile({
-                    // source: new ol.source.XYZ({
-                    //     url: "http://ms.longdo.com/mmmap/img.php?zoom={z}&x={x}&y={y}&mode=" + layername + "&key=e5b6c5354d7dea400d9c2304526fae94&proj=" + proj
-                    // })
-                    source: new ol.source.OSM()
+                    source: new ol.source.XYZ({
+                        url: "http://ms.longdo.com/mmmap/img.php?zoom={z}&x={x}&y={y}&mode=" + layername + "&key=e5b6c5354d7dea400d9c2304526fae94&proj=" + proj
+                    })
+                    // source: new ol.source.OSM()
                 })
             ],
             view: new ol.View({
                 center: start_coordinate,
                 zoom: 18
             }),
-            loadTilesWhileAnimating: true,
-            loadTilesWhileInteracting: true
         });
 
         // Get latitude and longitude from URL parameters
@@ -225,7 +223,6 @@
                 .catch(error => console.error('Error fetching route:', error));
         }
 
-
         // Function to get the route steps
         function getRouteSteps(startPoint, destination) {
             // Use OSRM API to get the route
@@ -234,15 +231,10 @@
             fetch(routeUrl)
                 .then(response => response.json())
                 .then(data => {
-                    
+
                     const steps = data.routes[0].legs[0].steps;
-                    const distance = data.routes[0].legs[0].distance / 1000; // Convert meters to kilometers
                     const stepsContainer = document.getElementById('steps');
                     stepsContainer.innerHTML = ''; // Clear previous steps
-
-
-                    // Debugging
-                    console.log('Distance to destination:', distance);
 
                     const turnTranslations = {
                         'straight': {
@@ -355,6 +347,9 @@
             return snapped.geometry.coordinates;
         }
 
+        // เพิ่มตัวแปรสำหรับเก็บสถานะว่าผู้ใช้ถึงจุดหมายแล้วหรือไม่
+        let hasReachedDestination = false;
+
         // Function to track the user's location in real-time
         function trackUserLocation(routeCoords) {
             const marker = new ol.Overlay({
@@ -372,10 +367,10 @@
                         var userLocation = [position.coords.longitude, position.coords.latitude];
                         var snappedLocation = snapToRoute(userLocation, routeCoords);
 
-
+                        // เรียก OSRM API เพื่อคำนวณเส้นทางจริง
+                        var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLocation[0]},${userLocation[1]};${destination[0]},${destination[1]}?overview=false`;
 
                         // Update new route with current location without fetch API
-                        // New route layer
                         var routeFeature = new ol.Feature({
                             geometry: new ol.geom.LineString(snappedLocation)
                         });
@@ -432,10 +427,32 @@
                         map.addLayer(routeLayer);
                         map.addLayer(iconLayer);
 
-
-                        // debug update user location
+                        // Debug update user location
                         console.log('ตำแหน่งปัจจุบัน: ', snappedLocation);
 
+                        // เรียก API และคำนวณระยะทางจริง
+                        fetch(osrmUrl)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.routes.length > 0) {
+                                    var distance = data.routes[0].distance / 1000; // ระยะทางในหน่วยกิโลเมตร
+                                    console.log('Distance to destination (OSRM):', distance);
+
+                                    // ตรวจสอบว่าผู้ใช้ถึงจุดหมายหรือไม่ และยังไม่ได้แจ้งเตือน
+                                    if (distance < 0.05 && !hasReachedDestination) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'คุณเดินทางถึงที่หมายปลายทางแล้ว',
+                                            showConfirmButton: false,
+                                            allowOutsideClick: false,
+                                            allowEnterKey: false,
+                                        });
+
+                                        // เปลี่ยนสถานะเป็นถึงจุดหมายแล้ว เพื่อหยุดการแจ้งเตือนซ้ำ
+                                        hasReachedDestination = true;
+                                    }
+                                }
+                            });
 
                     },
                     error => {
@@ -444,13 +461,13 @@
                         enableHighAccuracy: true,
                         maximumAge: 0,
                         timeout: 5000,
-
                     }
                 );
             } else {
                 console.error('Geolocation is not supported by this browser.');
             }
         }
+
 
         // Get the user's position and draw the route
         getUserPosition()
@@ -539,7 +556,7 @@
                                 map.getView().animate({
                                     center: ol.proj.fromLonLat(snappedLocation),
                                     zoom: 18,
-                                    duration: 3000 // duration in milliseconds
+                                    duration: 10000 // duration in milliseconds
                                 });
                             })
                             .catch(error => console.error('Error fetching route:', error));
