@@ -9,6 +9,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
     <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
 
+    <!-- Map box -->
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+
+
+
     <!-- Custom CSS For MAP Page -->
     <link rel="stylesheet" href="../_dist/_css/_map.css">
 </head>
@@ -17,23 +24,27 @@
     <div id="map"></div>
     <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
     <script>
-        // When the map is loaded, close the loading
+
+        // Load the OpenLayers map
+        var layername = 'icons';
+        var proj = 'epsg3857';
         var map = new ol.Map({
             target: 'map',
             layers: [
                 new ol.layer.Tile({
-                    source: new ol.source.OSM()
+                    source: new ol.source.XYZ({
+                        url: "http://ms.longdo.com/mmmap/img.php?zoom={z}&x={x}&y={y}&mode=" + layername + "&key=e5b6c5354d7dea400d9c2304526fae94&proj=" + proj
+                    })
                 })
             ],
             view: new ol.View({
                 center: start_coordinate,
                 zoom: 18
-            })
+            }),
+            loadTilesWhileAnimating: true,
+            loadTilesWhileInteracting: true
         });
 
-
-
-        // Coordinates for the destination (ร้านเจ๊จันทร์ บ้านห้วยผาก)
         // Get latitude and longitude from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const lat = urlParams.get('lat');
@@ -44,25 +55,6 @@
 
         // Get the user's current location
         var start_coordinate = '';
-
-        function userLocation() {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lon = position.coords.longitude;
-                var coordinate = lon + ',' + lat;
-                start_coordinate = coordinate;
-                // console.log('ตำแหน่งปัจจุบัน: ', coordinate);
-            });
-            return start_coordinate;
-        }
-
-        // Set the map center once the user's position is obtained
-        getUserPosition()
-            .then(userPosition => {
-                var userLocation = ol.proj.fromLonLat(userPosition);
-                map.getView().setCenter(userLocation);
-            })
-            .catch(error => console.error('Error getting user position:', error));
 
         // Function to get the user's current position
         function getUserPosition() {
@@ -79,6 +71,7 @@
                         },
                         error => {
                             reject(error);
+
                         }
                     );
                 } else {
@@ -92,8 +85,7 @@
 
             // SweetAlert loading
             Swal.fire({
-                title: 'กำลังค้นหาเส้นทาง',
-                html: '<img src="../_dist/_img/pathway.gif" width="96px" height="96px">',
+                html: '<img src="../_dist/_img/pathway.gif" width="96px" height="96px"><br><b>กำลังค้นหาเส้นทาง</b>',
                 timerProgressBar: true,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
@@ -109,78 +101,6 @@
 
             // Get the route steps
             getRouteSteps(startPoint, destination);
-
-            var routeUrl = `https://router.project-osrm.org/route/v1/driving/${startPoint[0]},${startPoint[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
-            // Use OSRM API to get the route
-
-            fetch(routeUrl)
-                // SweetAlert loading
-                .then(response => response.json())
-                .then(data => {
-                    Swal.close();
-
-                    var routeCoords = data.routes[0].geometry.coordinates.map(coord => ol.proj.fromLonLat(coord));
-                    var routeFeature = new ol.Feature({
-                        geometry: new ol.geom.LineString(routeCoords)
-                    });
-
-                    var vectorSource = new ol.source.Vector({
-                        features: [routeFeature]
-                    });
-
-                    var vectorLayer = new ol.layer.Vector({
-                        source: vectorSource,
-                        style: new ol.style.Style({
-                            stroke: new ol.style.Stroke({
-                                color: '#00aaff',
-                                width: 4
-                            })
-                        })
-                    });
-
-                    map.addLayer(vectorLayer);
-
-                    // Section for adding the custom control to the map
-
-                    // Add icon for start point (user's location) and destination
-                    var startIcon = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([data.routes[0].geometry.coordinates[0][0], data.routes[0].geometry.coordinates[0][1]]))
-                    });
-
-                    var destinationIcon = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([data.routes[0].geometry.coordinates[data.routes[0].geometry.coordinates.length - 1][0], data.routes[0].geometry.coordinates[data.routes[0].geometry.coordinates.length - 1][1]]))
-                    });
-
-                    var iconStyleStart = new ol.style.Style({
-                        image: new ol.style.Icon({
-                            anchor: [0.5, 1],
-                            src: '../_dist/_img/start.png',
-                            scale: 0.05
-                        })
-                    });
-
-                    var iconStyleStop = new ol.style.Style({
-                        image: new ol.style.Icon({
-                            anchor: [0.5, 1],
-                            src: '../_dist/_img/end.png',
-                            scale: 0.05
-                        })
-                    });
-
-                    // startIcon.setStyle(iconStyleStart);
-                    destinationIcon.setStyle(iconStyleStop);
-
-                    var vectorSource = new ol.source.Vector({
-                        features: [startIcon, destinationIcon]
-                    });
-
-                    var vectorLayer = new ol.layer.Vector({
-                        source: vectorSource
-                    });
-
-                    map.addLayer(vectorLayer);
-                })
-                .catch(error => console.error('Error fetching route:', error));
         }
     </script>
 
@@ -259,8 +179,22 @@
                 .then(response => response.json())
                 .then(data => {
                     const steps = data.routes[0].legs[0].steps;
+                    const distance = data.routes[0].legs[0].distance / 1000; // Convert meters to kilometers
                     const stepsContainer = document.getElementById('steps');
                     stepsContainer.innerHTML = ''; // Clear previous steps
+
+                    // If the user is within 0.01 km of the destination, show a success message
+                    if (distance < 0.01) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'คุณเดินทางถึงที่หมายแล้ว',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+
+                    // Debugging
+                    console.log('Distance to destination:', distance);
 
                     const turnTranslations = {
                         'straight': {
@@ -394,22 +328,48 @@
 
                         map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
 
-                        // Update route line and 
+                        // Update route line
                         var routeUrl = `https://router.project-osrm.org/route/v1/driving/${snappedLocation[0]},${snappedLocation[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
                         fetch(routeUrl)
                             .then(response => response.json())
                             .then(data => {
+                                Swal.close(); // Close the loading alert
                                 var routeCoords = data.routes[0].geometry.coordinates.map(coord => ol.proj.fromLonLat(coord));
+
+                                // Add end point icon
+                                var destinationIcon = new ol.Feature({
+                                    geometry: new ol.geom.Point(ol.proj.fromLonLat([destination[0], destination[1]]))
+                                });
+
+                                var iconStyleStop = new ol.style.Style({
+                                    image: new ol.style.Icon({
+                                        anchor: [0.5, 1],
+                                        src: '../_dist/_img/end.png',
+                                        scale: 0.05
+                                    })
+                                });
+
+                                destinationIcon.setStyle(iconStyleStop);
+
+                                var iconSource = new ol.source.Vector({
+                                    features: [destinationIcon]
+                                });
+
+                                var iconLayer = new ol.layer.Vector({
+                                    source: iconSource
+                                });
+
+                                // New route layer
                                 var routeFeature = new ol.Feature({
                                     geometry: new ol.geom.LineString(routeCoords)
                                 });
 
-                                var vectorSource = new ol.source.Vector({
+                                var routeSource = new ol.source.Vector({
                                     features: [routeFeature]
                                 });
 
-                                var vectorLayer = new ol.layer.Vector({
-                                    source: vectorSource,
+                                var routeLayer = new ol.layer.Vector({
+                                    source: routeSource,
                                     style: new ol.style.Style({
                                         stroke: new ol.style.Stroke({
                                             color: '#00aaff',
@@ -418,32 +378,17 @@
                                     })
                                 });
 
+                                // Remove existing route and icon layers
                                 map.getLayers().forEach(layer => {
                                     if (layer instanceof ol.layer.Vector) {
                                         map.removeLayer(layer);
                                     }
                                 });
 
-                                var steps = data.routes[0].legs[0].steps;
-                                var currentStep = steps.find(step => {
-                                    var stepCoords = step.geometry.coordinates;
-                                    return stepCoords.some(coord => coord[0] === snappedLocation[0] && coord[1] === snappedLocation[1]);
-                                });
-
-                                var currentStepIndex = steps.indexOf(currentStep);
-                                var stepTexts = document.querySelectorAll('.step-indicator > div');
-
-                                stepTexts.forEach((stepText, index) => {
-                                    if (index === currentStepIndex) {
-                                        stepText.style.fontWeight = 'bold';
-                                        stepText.style.color = '#007bff';
-                                    } else {
-                                        stepText.style.fontWeight = 'normal';
-                                        stepText.style.color = '#000';
-                                    }
-                                });
-
-                                map.addLayer(vectorLayer);
+                                // Add new route and icon layers
+                                map.addLayer(routeLayer);
+                                map.addLayer(iconLayer);
+                                // map.addLayer(circleLayer);
                             })
                             .catch(error => console.error('Error fetching route:', error));
 
@@ -454,25 +399,9 @@
                         // marker.getElement().style.transform = `rotate(${heading}deg)`;
                         // map.getView().setRotation(-heading * Math.PI / 180);
 
+                        // debug update user location
+                        console.log('ตำแหน่งปัจจุบัน: ', snappedLocation);
 
-                        // Calculate the distance between the user's location and the destination
-                        var distance = turf.distance(turf.point(snappedLocation), turf.point(destination), {
-                            units: 'kilometers'
-
-                        });
-
-                        // If the user is within 0.01 km of the destination, show a success message
-                        if (distance < 0.01) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'คุณเดินทางถึงที่หมายแล้ว',
-                                showConfirmButton: false,
-                                timer: 2000
-                            });
-                        }
-
-                        // Debugging
-                        console.log('Distance to destination:', distance);
 
                     },
                     error => {
@@ -480,7 +409,9 @@
                     }, {
                         enableHighAccuracy: true,
                         maximumAge: 0,
-                        timeout: 5000
+                        timeout: 5000,
+                        distanceFilter: 1,
+
                     }
                 );
             } else {
@@ -507,16 +438,18 @@
             })
             .catch(
                 error => console.error('Error getting user position:', error),
+                
                 // แสดงข้อความเมื่อไม่สามารถระบุตำแหน่งปัจจุบันได้
                 Swal.fire({
                     // icon: 'error',
                     html: '<img src="../_dist/_img/maps.gif" width="96px" height="96px"><br>กรุณาเปิด GPS หรืออนุญาตให้เว็บไซต์เข้าถึงตำแหน่งปัจจุบันของคุณ',
-                    title: '',
-                    text: 'กรุณาเปิด GPS หรืออนุญาตให้เว็บไซต์เข้าถึงตำแหน่งปัจจุบันของคุณ',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     showConfirmButton: false,
-                })
+                }),
+
+                // Try to get the user's location again
+                getUserPosition()
 
             );
 
@@ -526,7 +459,7 @@
                 const options = opt_options || {};
 
                 const button = document.createElement('button');
-                button.innerHTML = '<i class="fas fa-map-marker-alt" aria-hidden="true"></i>';
+                button.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
 
                 const element = document.createElement('div');
                 element.className = 'ol-control ol-unselectable center-user-location';
@@ -545,8 +478,7 @@
             handleCenterUserLocation() {
                 // SweetAlert loading
                 Swal.fire({
-                    title: 'กำลังค้นหาตำแหน่งปัจจุบัน',
-                    html: '<img src="../_dist/_img/pathway.gif" width="96px" height="96px">',
+                    html: '<img src="../_dist/_img/pathway.gif" width="96px" height="96px"><br>กำลังค้นหาตำแหน่งปัจจุบัน',
                     timerProgressBar: true,
                     allowOutsideClick: false,
                     allowEscapeKey: false,
@@ -559,7 +491,7 @@
                     .then(userPosition => {
                         var userLocation = [userPosition[0], userPosition[1]];
 
-                        // Fetch the route coordinates for snapping
+                        // Use Turf.js to snap the user's location to the nearest point on the route
                         var routeUrl = `https://router.project-osrm.org/route/v1/driving/${userPosition[0]},${userPosition[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson`;
                         fetch(routeUrl)
                             .then(response => response.json())
@@ -575,9 +507,7 @@
                                     center: ol.proj.fromLonLat(snappedLocation),
                                     zoom: 18,
                                     duration: 3000 // duration in milliseconds
-                                }, () => {});
-
-
+                                });
                             })
                             .catch(error => console.error('Error fetching route:', error));
                     })

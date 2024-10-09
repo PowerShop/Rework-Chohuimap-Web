@@ -13,7 +13,6 @@
 
     <div id="no-data-found"></div>
 
-
     <!-- 3 Cards -->
     <div class="row mt-3" id="quick_search">
         <h3 class="text-start"><i class="fa-solid fa-magnifying-glass" style="--fa-bounce-land-scale-x: 1.05;--fa-bounce-land-scale-y: .8;--fa-bounce-rebound: 5px;"></i> ค้นหาด่วน</h3>
@@ -21,7 +20,7 @@
             <div class="card border border-0 quick-search" data-keywords="ขนม,ของทานเล่น,อาหาร" style="background-color: rgb(63, 155, 241);">
                 <div class="card-body text-center">
                     <a href="#" class="text-decoration-none text-white">
-                        <img src="_dist/_img/food.png" class="img-fluid" alt="food" />
+                        <img src="_dist/_img/food.png" class="img-fluid" alt="food" width="64px" height="64px"/>
                     </a>
                 </div>
             </div>
@@ -32,7 +31,7 @@
             <div class="card border border-0 quick-search" data-keywords="เครื่องดื่ม,เหล้า,เบียร์,แอลกอฮอร์,น้ำอัดลม,น้ำเปล่า" style="background-color: rgb(246, 162, 0);">
                 <div class="card-body text-center">
                     <a href="#" class="text-decoration-none text-white">
-                        <img src="_dist/_img/drink.png" class="img-fluid" alt="drink" />
+                        <img src="_dist/_img/drink.png" class="img-fluid" alt="drink" width="64px" height="64px"/>
                     </a>
                 </div>
             </div>
@@ -43,7 +42,7 @@
             <div class="card border border-0 quick-search" data-keywords="ขนม" style="background-color: rgb(237, 39, 39);">
                 <div class="card-body text-center">
                     <a href="#" class="text-decoration-none text-white">
-                        <img src="_dist/_img/snack.png" class="img-fluid" alt="snack" />
+                        <img src="_dist/_img/snack.png" class="img-fluid" alt="snack" width="64px" height="64px"/>
                     </a>
                 </div>
             </div>
@@ -59,6 +58,34 @@
                 </div>
             </div>
             <h5 class="mt-2"><i class="fa-solid fa-pills"></i> ยารักษาโรค</h5>
+        </div>
+    </div>
+
+    <hr class="rounded" style="border: 3px solid #000;">
+
+    <!-- 4 Test Card -->
+    <div class="row mt-3" id="">
+        <h3 class="text-start"><i class="fa-solid fa-screwdriver-wrench" style="--fa-bounce-land-scale-x: 1.05;--fa-bounce-land-scale-y: .8;--fa-bounce-rebound: 5px;"></i> ทดสอบ</h3>
+        <div class="col-md-2 mb-2">
+            <div class="card border border-0"style="background-color: rgb(63, 155, 241);">
+                <div class="card-body text-center">
+                    <a href="?page=map&storename=หอรัตนพร&lat=13.624808838397886&lon=99.59344839445521" class="text-decoration-none text-white">
+                        <img src="_dist/_img/apartment.png" class="img-fluid" alt="apartment" width="64px" height="64px"/>
+                    </a>
+                </div>
+            </div>
+            <h5 class="mt-2"><i class="fa-solid fa-bowl-food"></i> หอรัตนพร</h5>
+        </div>
+
+        <div class="col-md-2 mb-2">
+            <div class="card border border-0" style="background-color: rgb(246, 162, 0);">
+                <div class="card-body text-center">
+                    <a href="?page=map&storename=7-11&lat=13.621183293565288&lon=99.59609820848071" class="text-decoration-none text-white">
+                        <img src="_dist/_img/7-11.png" class="img-fluid" alt="7-11" width="64px" height="64px"/>
+                    </a>
+                </div>
+            </div>
+            <h5 class="mt-2"><i class="fa-solid fa-wine-bottle"></i> 7-11 </h5>
         </div>
     </div>
 </div>

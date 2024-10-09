@@ -76,7 +76,6 @@
     height: 50px;
     background: url('../_img/mini-car.png') no-repeat center center;
     background-size: contain;
-    /* animation: drive 5s linear infinite; */
 }
 
 @keyframes drive {
