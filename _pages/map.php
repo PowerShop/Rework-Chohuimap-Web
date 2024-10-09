@@ -480,6 +480,8 @@
                     },
                     error => {
                         console.error('Error tracking user location:', error);
+                        // ทำการลองเรียกฟังก์ชันอีกครั้งหากเกิดข้อผิดพลาด
+                        trackUserLocation(routeCoords);
                     }, {
                         enableHighAccuracy: true,
                         maximumAge: 0,
