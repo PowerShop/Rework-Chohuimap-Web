@@ -1,17 +1,10 @@
-# Environment variables
-.env
-
 # IDEs and editors
 .vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-
-# OS generated files
-.DS_Store
-Thumbs.db
 
 # Apache configuration files
 .htaccess
+
+# Workspace specific files
+*.code-workspace
+.editorconfig
+.gitingore
