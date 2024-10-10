@@ -399,6 +399,21 @@
             marker.getElement().innerHTML = '<div class="car-animation" aria-hidden="true"></div>';
             map.addOverlay(marker);
 
+            //  If user out of route, try to fetch route again
+            if (userLocation.length > 0) {
+                var snappedLocation = snapToRoute(userLocation, routeCoords);
+                if (snappedLocation[0] === 0 && snappedLocation[1] === 0) {
+                    console.log('User out of route, retrying to fetch route...');
+                    drawRoute(userLocation, destination);
+                }
+            }
+
+            // Rotate the marker based on the user's heading but only if the user is moving
+            function rotateMarker(heading) {
+                marker.getElement().style.transform = `rotate(${heading}deg)`;
+            }
+
+            // ฟังก์ชันสำหรับติดตามตำแหน่งปัจจุบันของผู้ใช้
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     position => {
@@ -408,9 +423,15 @@
                         // เรียก OSRM API เพื่อคำนวณเส้นทางจริง
                         var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLocation[0]},${userLocation[1]};${destination[0]},${destination[1]}?overview=false&geometries=geojson`;
 
+                        // หมุนรถตามทิศทางของผู้ใช้
+                        // Rotate marker based on heading if available
+                        if (position.coords.heading !== null) {
+                            rotateMarker(position.coords.heading);
+                        }
+
                         // New route layer
                         // var routeFeature = new ol.Feature({
-                        //     geometry: new ol.geom.LineString([snappedLocation])
+                        //     geometry: new ol.geom.LineString([ol.proj.fromLonLat(userLocation)])
                         // });
 
                         // var routeSource = new ol.source.Vector({
@@ -421,7 +442,7 @@
                         //     source: routeSource,
                         //     style: new ol.style.Style({
                         //         stroke: new ol.style.Stroke({
-                        //             color: '#00aaff',
+                        //             color: '#fe0000',
                         //             width: 4
                         //         })
                         //     })
@@ -454,7 +475,7 @@
 
                         // Remove existing route and icon layers
                         // map.getLayers().forEach(layer => {
-                        //     if (layer.get('name') === 'route' || layer.get('name') === 'icon') {
+                        //     if (layer.get('name') === 'route') {
                         //         map.removeLayer(layer);
                         //     }
                         // });
@@ -487,12 +508,11 @@
                                     document.getElementById('duration').innerText = `${(data.routes[0].duration / 60).toFixed(0)} นาที`;
 
                                     // ตรวจสอบว่าผู้ใช้ถึงจุดหมายหรือไม่ และยังไม่ได้แจ้งเตือน
-                                    if (distance < 0.05 && !hasReachedDestination) {
+                                    if (distance < 1 && !hasReachedDestination) {
                                         Swal.fire({
                                             html: '<img src="../_dist/_img/travelling.gif" width="96px" height="96px"><br>คุณเดินทางถึงที่หมายปลายทางแล้ว',
                                             showConfirmButton: true,
                                             allowOutsideClick: false,
-                                            allowEnterKey: false,
                                             confirmButtonText: 'สรุปผลการเดินทาง',
                                             // หลังจากกดปุ่ม OK ให้ส่งข้อมูลการเดินทางไปยังหน้า result.php
                                             preConfirm: () => {
