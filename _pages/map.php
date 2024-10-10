@@ -435,6 +435,17 @@
                             source: iconSource
                         });
 
+                        // Add text "Your location" to the marker
+                        var userLocationText = new ol.Overlay({
+                            position: ol.proj.fromLonLat(snappedLocation),
+                            element: document.createElement('div'),
+                            positioning: 'bottom-center' // Position the text above the marker
+                        });
+
+                        userLocationText.getElement().className = 'user-location-text';
+                        userLocationText.getElement().innerHTML = 'ตำแหน่งปัจจุบันของคุณ';
+                        map.addOverlay(userLocationText);
+
                         // Remove existing route and icon layers
                         map.getLayers().forEach(layer => {
                             if (layer.get('name') === 'route' || layer.get('name') === 'icon') {
@@ -462,9 +473,12 @@
                                     console.log('Distance to destination (OSRM):', distance);
 
                                     // อัพเดทระยะทางและเวลาที่เหลือ
-                                    document.getElementById('distance').innerText = `${distance.toFixed(2)} กิโลเมตร`;
+                                    if (distance < 1) {
+                                        document.getElementById('distance').innerText = `${(distance * 1000).toFixed(0)} เมตร`;
+                                    } else {
+                                        document.getElementById('distance').innerText = `${distance.toFixed(2)} กิโลเมตร`;
+                                    }
                                     document.getElementById('duration').innerText = `${(data.routes[0].duration / 60).toFixed(0)} นาที`;
-                                    
 
                                     // ตรวจสอบว่าผู้ใช้ถึงจุดหมายหรือไม่ และยังไม่ได้แจ้งเตือน
                                     if (distance < 0.05 && !hasReachedDestination) {

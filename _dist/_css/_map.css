@@ -82,7 +82,19 @@
     0% {
         transform: translateX(0);
     }
+
     100% {
         transform: translateX(100px);
     }
+}
+
+.user-location-text {
+    background-color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    font-size: 12px;
+    position: relative;
+    bottom: 25px;
+    /* Adjust this value to move the text further above the marker */
 }
