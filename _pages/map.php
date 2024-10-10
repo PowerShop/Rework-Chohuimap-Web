@@ -127,7 +127,6 @@
                         },
                         error => {
                             reject(error);
-
                         }
                     );
                 } else {
