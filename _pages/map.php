@@ -6,15 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenStreetMap with OpenLayers</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
-    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
 
     <!-- Custom JS -->
     <script src="../_dist/_js/_goToTop.js"></script>
 
     <!-- Custom CSS For MAP Page -->
     <link rel="stylesheet" href="../_dist/_css/_map.css">
-    <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
 </head>
 
 <body>
@@ -100,7 +97,7 @@
             ],
             view: new ol.View({
                 center: start_coordinate,
-                zoom: 18
+                zoom: 16
             }),
         });
 
@@ -242,6 +239,8 @@
                 .catch(error => console.error('Error fetching route:', error));
         }
 
+        var stepText;
+
         // Function to get the route steps
         function getRouteSteps(startPoint, destination) {
             // Use OSRM API to get the route
@@ -323,7 +322,7 @@
                             text: turns,
                             icon
                         } = turnTranslations[step.maneuver.modifier] || turnTranslations['default'];
-                        let ref = step.ref ? `${turns}ที่ถนน ${step.ref}` : `${turns}ที่ถนน ไม่ทราบชื่อ`;
+                        let ref = step.ref ? `${turns} ที่ถนน ${step.ref}` : `${turns} ที่ถนน ไม่ทราบชื่อ`;
 
                         if (index === 0) {
                             ref = 'จุดเริ่มต้น';
@@ -337,15 +336,17 @@
 
                         const stepText = new ol.Overlay({
                             position: ol.proj.fromLonLat([step.maneuver.location[0], step.maneuver.location[1]]),
-                            element: document.createElement('div')
+                            element: document.createElement('div'),
+                            positioning: 'center-center', // Position the text above the marker
+                            stopEvent: false
                         });
-
-
 
                         const stepElement = document.createElement('div');
                         stepElement.className = 'step-text';
                         stepElement.innerHTML = `<i class="${icon}"></i> ${ref}`;
-                        stepsContainer.appendChild(stepElement);
+                        stepText.getElement().appendChild(stepElement);
+
+                        map.addOverlay(stepText); // Add the overlay to the map
 
                         const iconElement = document.createElement('i');
                         iconElement.className = icon;
@@ -388,10 +389,12 @@
                 stopEvent: false
             });
 
+            // ใส่ข้อความบนตัว marker (รถ)
             overLayText.getElement().className = 'user-location-text';
-            overLayText.getElement().innerHTML = 'ตำแหน่งปัจจุบันของคุณ';
+            overLayText.getElement().innerHTML = 'คุณ';
             map.addOverlay(overLayText);
 
+            // ตั้งค่าสำหรับ marker (รถ)
             marker.getElement().className = 'user-location-marker';
             marker.getElement().innerHTML = '<div class="car-animation" aria-hidden="true"></div>';
             map.addOverlay(marker);
@@ -406,23 +409,25 @@
                         var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLocation[0]},${userLocation[1]};${destination[0]},${destination[1]}?overview=false&geometries=geojson`;
 
                         // New route layer
-                        var routeFeature = new ol.Feature({
-                            geometry: new ol.geom.LineString([ol.proj.fromLonLat(userLocation), ol.proj.fromLonLat(snappedLocation)])
-                        });
+                        // var routeFeature = new ol.Feature({
+                        //     geometry: new ol.geom.LineString([snappedLocation])
+                        // });
 
-                        var routeSource = new ol.source.Vector({
-                            features: [routeFeature]
-                        });
+                        // var routeSource = new ol.source.Vector({
+                        //     features: [routeFeature]
+                        // });
 
-                        var routeLayer = new ol.layer.Vector({
-                            source: routeSource,
-                            style: new ol.style.Style({
-                                stroke: new ol.style.Stroke({
-                                    color: '#00aaff',
-                                    width: 4
-                                })
-                            })
-                        });
+                        // var routeLayer = new ol.layer.Vector({
+                        //     source: routeSource,
+                        //     style: new ol.style.Style({
+                        //         stroke: new ol.style.Stroke({
+                        //             color: '#00aaff',
+                        //             width: 4
+                        //         })
+                        //     })
+                        // });
+
+                        console.log('ตำแหน่งปัจจุบัน (userLocation): ', userLocation);
 
                         // Add end point icon
                         var destinationIcon = new ol.Feature({
@@ -448,22 +453,22 @@
                         });
 
                         // Remove existing route and icon layers
-                        map.getLayers().forEach(layer => {
-                            if (layer.get('name') === 'route' || layer.get('name') === 'icon') {
-                                map.removeLayer(layer);
-                            }
-                        });
+                        // map.getLayers().forEach(layer => {
+                        //     if (layer.get('name') === 'route' || layer.get('name') === 'icon') {
+                        //         map.removeLayer(layer);
+                        //     }
+                        // });
 
                         marker.setPosition(ol.proj.fromLonLat(snappedLocation));
                         overLayText.setPosition(ol.proj.fromLonLat(snappedLocation));
                         map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
 
                         // Add new route and icon layers
-                        map.addLayer(routeLayer);
+                        // map.addLayer(routeLayer);
                         map.addLayer(iconLayer);
 
                         // Debug update user location
-                        console.log('ตำแหน่งปัจจุบัน: ', snappedLocation);
+                        console.log('ตำแหน่งปัจจุบัน (sanppedLocation): ', snappedLocation);
 
                         // เรียก API และคำนวณระยะทางจริง
                         fetch(osrmUrl)
@@ -484,11 +489,15 @@
                                     // ตรวจสอบว่าผู้ใช้ถึงจุดหมายหรือไม่ และยังไม่ได้แจ้งเตือน
                                     if (distance < 0.05 && !hasReachedDestination) {
                                         Swal.fire({
-                                            icon: 'success',
-                                            title: 'คุณเดินทางถึงที่หมายปลายทางแล้ว',
-                                            showConfirmButton: false,
+                                            html: '<img src="../_dist/_img/travelling.gif" width="96px" height="96px"><br>คุณเดินทางถึงที่หมายปลายทางแล้ว',
+                                            showConfirmButton: true,
                                             allowOutsideClick: false,
                                             allowEnterKey: false,
+                                            confirmButtonText: 'สรุปผลการเดินทาง',
+                                            // หลังจากกดปุ่ม OK ให้ส่งข้อมูลการเดินทางไปยังหน้า result.php
+                                            preConfirm: () => {
+                                                window.location.href = `?page=result&start=${start_coordinate}&end=${destination}&distance=${distance}&duration=${data.routes[0].duration}`;
+                                            }
                                         });
 
                                         // เปลี่ยนสถานะเป็นถึงจุดหมายแล้ว เพื่อหยุดการแจ้งเตือนซ้ำ
@@ -548,6 +557,7 @@
             );
 
         // Custom control to center the map on the user's location
+
         class CenterUserLocationControl extends ol.control.Control {
             constructor(opt_options) {
                 const options = opt_options || {};
@@ -555,22 +565,37 @@
                 const button = document.createElement('button');
                 button.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
 
+                const toggleStepsButton = document.createElement('button');
+                toggleStepsButton.innerHTML = '<i class="fa-solid fa-eye"></i>'; // Toggle icon
+
+                const selectMarkerButton = document.createElement('button');
+                selectMarkerButton.innerHTML = '<i class="fa-solid fa-map-marker-alt"></i>'; // Marker selection icon
+
                 const element = document.createElement('div');
                 element.className = 'ol-control ol-unselectable center-user-location';
                 element.appendChild(button);
+                element.appendChild(toggleStepsButton);
+                element.appendChild(selectMarkerButton);
 
                 super({
                     element: element,
                     target: options.target
                 });
 
+                this.stepsVisible = true; // Default to steps visible
+                this.selectedMarker = null; // Default to no marker selected
+
                 // Click event to center the map on the user's location
                 button.addEventListener('click', this.handleCenterUserLocation.bind(this), false);
 
+                // Click event to toggle route steps visibility
+                toggleStepsButton.addEventListener('click', this.toggleRouteSteps.bind(this), false);
+
+                // Click event to select a marker
+                selectMarkerButton.addEventListener('click', this.handleSelectMarker.bind(this), false);
             }
 
             handleCenterUserLocation() {
-
                 var snappedLocation = snapToRoute(userLocation, routeCoords);
 
                 // Smoothly animate the map to the new center
@@ -578,11 +603,36 @@
                     center: ol.proj.fromLonLat(snappedLocation),
                     zoom: 18,
                     duration: 3000 // duration in milliseconds
-                })
+                });
+            }
+
+            toggleRouteSteps() {
+                this.stepsVisible = !this.stepsVisible;
+                const toggleStepsButton = this.element.querySelector('button:nth-child(2)');
+                toggleStepsButton.innerHTML = this.stepsVisible ? '<i class="fa-solid fa-eye"></i>' : '<i class="fa-solid fa-eye-slash"></i>';
+
+                // Show or hide the route steps
+                document.querySelectorAll('.step-text').forEach(step => {
+                    step.style.display = this.stepsVisible ? 'block' : 'none';
+                });
+            }
+
+            handleSelectMarker() {
+                // Logic to select a marker
+                // For demonstration, we'll just log a message
+                console.log('Marker selection mode activated');
+                // SweetAlert From to change car icon like motorcycle, bicycle, etc.
+            }
+
+            // Method to be called periodically to auto-center the map
+            autoCenterMap() {
+                if (this.autoCenterEnabled) {
+                    var snappedLocation = snapToRoute(userLocation, routeCoords);
+                    map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
+                }
             }
         }
 
-        // Add the custom control to the map
         map.addControl(new CenterUserLocationControl());
     </script>
 </body>

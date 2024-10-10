@@ -63,7 +63,7 @@
 }
 
 .user-location-marker {
-    color: redc !important;
+    color: red !important;
     /* Customize the color as needed */
     font-size: 24px !important;
     /* Customize the size as needed */
@@ -97,4 +97,15 @@
     position: relative;
     bottom: 40px;
     /* Adjust this value to move the text further above the marker */
+}
+
+.step-text {
+    background-color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    position: relative;
+    bottom: 10px;
+    /* Adjust this value to move the text further above the marker */
+    font-size: 10px;
 }

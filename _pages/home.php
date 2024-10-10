@@ -20,7 +20,7 @@
             <div class="card border border-0 quick-search" data-keywords="ขนม,ของทานเล่น,อาหาร" style="background-color: rgb(63, 155, 241);">
                 <div class="card-body text-center">
                     <a href="#" class="text-decoration-none text-white">
-                        <img src="_dist/_img/food.png" class="img-fluid" alt="food" width="64px" height="64px"/>
+                        <img src="_dist/_img/food.png" class="img-fluid" alt="food" width="64px" height="64px" />
                     </a>
                 </div>
             </div>
@@ -31,7 +31,7 @@
             <div class="card border border-0 quick-search" data-keywords="เครื่องดื่ม,เหล้า,เบียร์,แอลกอฮอร์,น้ำอัดลม,น้ำเปล่า" style="background-color: rgb(246, 162, 0);">
                 <div class="card-body text-center">
                     <a href="#" class="text-decoration-none text-white">
-                        <img src="_dist/_img/drink.png" class="img-fluid" alt="drink" width="64px" height="64px"/>
+                        <img src="_dist/_img/drink.png" class="img-fluid" alt="drink" width="64px" height="64px" />
                     </a>
                 </div>
             </div>
@@ -42,7 +42,7 @@
             <div class="card border border-0 quick-search" data-keywords="ขนม" style="background-color: rgb(237, 39, 39);">
                 <div class="card-body text-center">
                     <a href="#" class="text-decoration-none text-white">
-                        <img src="_dist/_img/snack.png" class="img-fluid" alt="snack" width="64px" height="64px"/>
+                        <img src="_dist/_img/snack.png" class="img-fluid" alt="snack" width="64px" height="64px" />
                     </a>
                 </div>
             </div>
@@ -67,10 +67,10 @@
     <div class="row mt-3" id="">
         <h3 class="text-start"><i class="fa-solid fa-screwdriver-wrench" style="--fa-bounce-land-scale-x: 1.05;--fa-bounce-land-scale-y: .8;--fa-bounce-rebound: 5px;"></i> ทดสอบ</h3>
         <div class="col-md-2 mb-2">
-            <div class="card border border-0"style="background-color: rgb(63, 155, 241);">
+            <div class="card border border-0" style="background-color: rgb(63, 155, 241);">
                 <div class="card-body text-center">
                     <a href="?page=map&storename=หอรัตนพร&lat=13.624808838397886&lon=99.59344839445521" class="text-decoration-none text-white">
-                        <img src="_dist/_img/apartment.png" class="img-fluid" alt="apartment" width="64px" height="64px"/>
+                        <img src="_dist/_img/apartment.png" class="img-fluid" alt="apartment" width="64px" height="64px" />
                     </a>
                 </div>
             </div>
@@ -81,7 +81,7 @@
             <div class="card border border-0" style="background-color: rgb(246, 162, 0);">
                 <div class="card-body text-center">
                     <a href="?page=map&storename=7-11&lat=13.621183293565288&lon=99.59609820848071" class="text-decoration-none text-white">
-                        <img src="_dist/_img/7-11.png" class="img-fluid" alt="7-11" width="64px" height="64px"/>
+                        <img src="_dist/_img/7-11.png" class="img-fluid" alt="7-11" width="64px" height="64px" />
                     </a>
                 </div>
             </div>
@@ -176,37 +176,57 @@
     function displayResults(stores) {
         const resultsContainer = document.getElementById('results');
         resultsContainer.innerHTML = '';
-        stores.forEach(store => {
-            const keywords = JSON.parse(store.store_keywords).join(', ');
-            const card = `
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100 shadow-sm border-0">
-                            <img src="${store.store_image}" class="card-img-top rounded-top" alt="${store.store_name}" style="height: 200px; object-fit: cover;">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary"><i class="fa-solid fa-store me-2"></i>${store.store_name}</h5>
-                                <p class="card-text text-muted"><i class="fa-solid fa-info-circle me-2"></i>${store.store_description}</p>
-                                <p class="card-text"><i class="fa-solid fa-map-marker-alt text-danger me-2"></i>${store.store_address}</p>
-                                <p class="card-text"><i class="fa-solid fa-phone text-success me-2"></i>${store.store_phone}</p>
-                                <p class="card-text"><i class="fa-solid fa-user text-info me-2"></i>${store.store_author}</p>
-                                <p class="card-text"><i class="fa-solid fa-clock text-warning me-2"></i>เปิด: ${store.store_open} - ปิด: ${store.store_close}</p>
-                                <p class="card-text"><i class="fa-solid fa-star text-warning me-2"></i>คะแนน: ${store.store_rating}</p>
-                                <hr>
-                                <p class="card-text"><i class="fa-solid fa-tags text-secondary me-2"></i>คำสำคัญ: ${keywords}</p>
-                                <hr>
-                                <div class="text-center">
-                                    <div class="row>
-                                        <div class="col-md-12">
-                                            <a href="?page=map&storename=${store.store_name}&lat=${store.store_lat}&lon=${store.store_lon}" class="btn btn-primary mb-1 text-white col-md-4"><i class="fa-solid fa-route me-2"></i>เดินทาง</a>
-                                            <a href="tel:${store.store_phone}" class="btn btn-success mb-1 text-white col-md-4"><i class="fa-solid fa-phone me-2"></i>โทร</a>
-                                            <button class="btn btn-info mb-1 text-white col-md-4 infooo" data-store-name="${store.store_name}" data-store-info="นี่คือรายละเอียดเกี่ยวกับ ${store.store_name}"><i class="fa-solid fa-info-circle me-2"></i>รายละเอียด</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
+        // คำนวณระยะทางระหว่างผู้ใช้กับร้านค้าด้วย Turf.js
+        // ดึงตำแหน่งผู้ใช้ด้วย Geolocation API
+        var userLocation = [];
+        navigator.geolocation.getCurrentPosition(function(position) {
+            userLocation = [position.coords.longitude, position.coords.latitude];
+            console.log("User Location: ", userLocation);
+
+            stores.forEach(store => {
+                const storeLocation = [store.store_lon, store.store_lat]; // ตำแหน่งร้านค้า
+                const distance = turf.distance(turf.point(userLocation), turf.point(storeLocation), {
+                    units: 'kilometers'
+                });
+
+                store.store_distance = distance.toFixed(2);
+            });
+
+            // Display results after calculating distances
+            stores.forEach(store => {
+                const keywords = JSON.parse(store.store_keywords).join(', ');
+                const card = `
+                <div class="col-md-4 mb-3">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="${store.store_image}" class="card-img-top rounded-top" alt="${store.store_name}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="fa-solid fa-store me-2"></i>${store.store_name}</h5>
+                    <p class="card-text"><i class="fa-solid fa-location-arrow text-primary me-2"></i>ระยะทาง: ~${store.store_distance} กม.</p>
+                    <p class="card-text text-muted"><i class="fa-solid fa-info-circle me-2"></i>${store.store_description}</p>
+                    <p class="card-text"><i class="fa-solid fa-map-marker-alt text-danger me-2"></i>${store.store_address}</p>
+                    <p class="card-text"><i class="fa-solid fa-phone text-success me-2"></i>${store.store_phone}</p>
+                    <p class="card-text"><i class="fa-solid fa-user text-info me-2"></i>${store.store_author}</p>
+                    <p class="card-text"><i class="fa-solid fa-clock text-warning me-2"></i>เปิด: ${store.store_open} - ปิด: ${store.store_close}</p>
+                    <p class="card-text"><i class="fa-solid fa-star text-warning me-2"></i>คะแนน: ${store.store_rating}</p>
+                    <hr>
+                    <p class="card-text"><i class="fa-solid fa-tags text-secondary me-2"></i>คำสำคัญ: ${keywords}</p>
+                    <hr>
+                    <div class="text-center">
+                        <div class="row>
+                        <div class="col-md-12">
+                            <a href="?page=map&storename=${store.store_name}&lat=${store.store_lat}&lon=${store.store_lon}" class="btn btn-primary mb-1 text-white col-md-4"><i class="fa-solid fa-route me-2"></i>เดินทาง</a>
+                            <a href="tel:${store.store_phone}" class="btn btn-success mb-1 text-white col-md-4"><i class="fa-solid fa-phone me-2"></i>โทร</a>
+                            <button class="btn btn-info mb-1 text-white col-md-4 infooo" data-store-name="${store.store_name}" data-store-info="นี่คือรายละเอียดเกี่ยวกับ ${store.store_name}"><i class="fa-solid fa-info-circle me-2"></i>รายละเอียด</button>
+                        </div>
                         </div>
                     </div>
-                `;
-            resultsContainer.innerHTML += card;
+                    </div>
+                </div>
+                </div>
+            `;
+                resultsContainer.innerHTML += card;
+            });
         });
     }
 </script>

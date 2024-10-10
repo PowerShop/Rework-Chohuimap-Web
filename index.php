@@ -34,6 +34,13 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="_dist/_css/_main.css" />
 
+    <!-- OpenLayers -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
+
+    <!-- Turf.js -->
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+
     <!-- Require User Location -->
     <script src="_dist/_js/_requirePermissionLocation.js"></script>
 </head>
@@ -45,7 +52,7 @@
     date_default_timezone_set("Asia/Bangkok");
 
     // Hide errors
-    @ini_set('display_errors', '0');
+    @ini_set('display_errors', '1');
 
     // Include API (Main core)
     require dirname(__FILE__) . '/_funcs/_api.php';
@@ -53,7 +60,7 @@
     // Include Navbar
     include '_pages/navbar.php';
 
-    $user = $_SESSION['user'];
+    // $user = $_SESSION['user'];
 
     if ($_GET) {
     } else {
