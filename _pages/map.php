@@ -509,15 +509,37 @@
 
                                     // ตรวจสอบว่าผู้ใช้ถึงจุดหมายหรือไม่ และยังไม่ได้แจ้งเตือน
                                     if (distance < 1 && !hasReachedDestination) {
+
+                                        // สร้างวงกลมรัศมี 50 เมตร รอบจุดหมายปลายทาง
+                                        var circle = new ol.geom.Circle(ol.proj.fromLonLat(destination), 50);
+                                        var circleFeature = new ol.Feature(circle);
+                                        var circleSource = new ol.source.Vector({
+                                            features: [circleFeature]
+                                        });
+                                        var circleLayer = new ol.layer.Vector({
+                                            source: circleSource,
+                                            style: new ol.style.Style({
+                                                fill: new ol.style.Fill({
+                                                    color: 'rgba(255, 0, 0, 0.1)'
+                                                }),
+                                                stroke: new ol.style.Stroke({
+                                                    color: 'rgba(255, 0, 0, 0.5)',
+                                                    width: 1
+                                                })
+                                            })
+                                        });
+
+                                        map.addLayer(circleLayer);
+
                                         Swal.fire({
                                             html: '<img src="../_dist/_img/travelling.gif" width="96px" height="96px"><br>คุณเดินทางถึงที่หมายปลายทางแล้ว',
                                             showConfirmButton: true,
                                             allowOutsideClick: false,
                                             confirmButtonText: 'สรุปผลการเดินทาง',
                                             // หลังจากกดปุ่ม OK ให้ส่งข้อมูลการเดินทางไปยังหน้า result.php
-                                            preConfirm: () => {
-                                                window.location.href = `?page=result&start=${start_coordinate}&end=${destination}&distance=${distance}&duration=${data.routes[0].duration}`;
-                                            }
+                                            // preConfirm: () => {
+                                            //     window.location.href = `?page=result&start=${start_coordinate}&end=${destination}&distance=${distance}&duration=${data.routes[0].duration}`;
+                                            // }
                                         });
 
                                         // เปลี่ยนสถานะเป็นถึงจุดหมายแล้ว เพื่อหยุดการแจ้งเตือนซ้ำ
