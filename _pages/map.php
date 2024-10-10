@@ -22,8 +22,6 @@
     <div class="container mt-3" id="route_detial">
         <div class="card border border-0">
             <div class="card-body">
-                <!-- <h4 class="card-title">Title</h4> -->
-                <!-- <button class="btn btn-primary" onclick="searchRoute()">ค้นหาตำแหน่งปัจจุบัน</button> -->
                 <p class="card-text">
                     <img src="_dist/_img/circle_blue.png" alt="" srcset="">
                     <b><span id="start" style="vertical-align: middle; font-size: 18px;" class="ms-2">ตำแหน่งของคุณ</span></b>
@@ -342,6 +340,8 @@
                             element: document.createElement('div')
                         });
 
+
+
                         const stepElement = document.createElement('div');
                         stepElement.className = 'step-text';
                         stepElement.innerHTML = `<i class="${icon}"></i> ${ref}`;
@@ -355,6 +355,7 @@
 
                         stepText.getElement().appendChild(document.createElement('br'));
                     });
+
                 })
                 .catch(error => console.error('Error fetching route:', error));
         }
@@ -380,6 +381,17 @@
                 element: document.createElement('div'),
                 stopEvent: false
             });
+
+            const overLayText = new ol.Overlay({
+                positioning: 'center-center',
+                element: document.createElement('div'),
+                stopEvent: false
+            });
+
+            overLayText.getElement().className = 'user-location-text';
+            overLayText.getElement().innerHTML = 'ตำแหน่งปัจจุบันของคุณ';
+            map.addOverlay(overLayText);
+
             marker.getElement().className = 'user-location-marker';
             marker.getElement().innerHTML = '<div class="car-animation" aria-hidden="true"></div>';
             map.addOverlay(marker);
@@ -393,9 +405,9 @@
                         // เรียก OSRM API เพื่อคำนวณเส้นทางจริง
                         var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLocation[0]},${userLocation[1]};${destination[0]},${destination[1]}?overview=false&geometries=geojson`;
 
-                        // Update new route with current location without fetch API
+                        // New route layer
                         var routeFeature = new ol.Feature({
-                            geometry: new ol.geom.LineString(snappedLocation)
+                            geometry: new ol.geom.LineString([ol.proj.fromLonLat(userLocation), ol.proj.fromLonLat(snappedLocation)])
                         });
 
                         var routeSource = new ol.source.Vector({
@@ -435,17 +447,6 @@
                             source: iconSource
                         });
 
-                        // Add text "Your location" to the marker
-                        var userLocationText = new ol.Overlay({
-                            position: ol.proj.fromLonLat(snappedLocation),
-                            element: document.createElement('div'),
-                            positioning: 'bottom-center' // Position the text above the marker
-                        });
-
-                        userLocationText.getElement().className = 'user-location-text';
-                        userLocationText.getElement().innerHTML = 'ตำแหน่งปัจจุบันของคุณ';
-                        map.addOverlay(userLocationText);
-
                         // Remove existing route and icon layers
                         map.getLayers().forEach(layer => {
                             if (layer.get('name') === 'route' || layer.get('name') === 'icon') {
@@ -454,7 +455,7 @@
                         });
 
                         marker.setPosition(ol.proj.fromLonLat(snappedLocation));
-
+                        overLayText.setPosition(ol.proj.fromLonLat(snappedLocation));
                         map.getView().setCenter(ol.proj.fromLonLat(snappedLocation));
 
                         // Add new route and icon layers
@@ -513,14 +514,14 @@
         }
 
 
-        // Get the user's position and draw the route
+        // ดึงตำแหน่งปัจจุบันของผู้ใช้
         getUserPosition()
             .then(userPosition => {
                 var startPoint = ol.proj.fromLonLat(userPosition);
                 drawRoute(userPosition, destination);
                 getRouteSteps(userPosition, destination);
 
-                // Fetch the route coordinates for snapping
+                // ดึงเส้นทางจาก OSRM API
                 var routeUrl = `https://router.project-osrm.org/route/v1/driving/${userPosition[0]},${userPosition[1]};${destination[0]},${destination[1]}?overview=full&geometries=geojson&steps=true`;
                 fetch(routeUrl)
                     .then(response => response.json())
@@ -535,19 +536,18 @@
 
                 // แสดงข้อความเมื่อไม่สามารถระบุตำแหน่งปัจจุบันได้
                 Swal.fire({
-                    // icon: 'error',
                     html: '<img src="../_dist/_img/maps.gif" width="96px" height="96px"><br>กรุณาเปิด GPS หรืออนุญาตให้เว็บไซต์เข้าถึงตำแหน่งปัจจุบันของคุณ',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     showConfirmButton: false,
                 }),
 
-                // Try to get the user's location again
+                // ลองเรียกฟังก์ชันอีกครั้งหากเกิดข้อผิดพลาด
                 getUserPosition()
 
             );
 
-        // Custom control for centering on user location
+        // Custom control to center the map on the user's location
         class CenterUserLocationControl extends ol.control.Control {
             constructor(opt_options) {
                 const options = opt_options || {};
@@ -579,7 +579,6 @@
                     zoom: 18,
                     duration: 3000 // duration in milliseconds
                 })
-
             }
         }
 
